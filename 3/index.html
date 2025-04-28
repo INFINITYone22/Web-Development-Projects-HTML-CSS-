@@ -1,0 +1,280 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Nova Creative - Digital Agency</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&family=Roboto+Slab:wght@400;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" integrity="sha512-9usAa10IRO0HhonpyAIVpjrylPvoDwiPUiKdWk5t3PyolY1cOd4DSE0Ga+ri4AuTroPR5aQvXU9xC6qOPnzFeg==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+</head>
+<body>
+
+    <header>
+        <nav>
+            <div class="logo">Nova Creative</div>
+            <ul>
+                <li><a href="#hero">Home</a></li>
+                <li><a href="#services">Services</a></li>
+                <li><a href="#portfolio">Portfolio</a></li>
+                <li><a href="#testimonials">Testimonials</a></li>
+                <li><a href="#about">About</a></li>
+                <li><a href="#contact">Contact</a></li>
+            </ul>
+        </nav>
+    </header>
+
+    <section id="hero" class="hero-section">
+        <div class="hero-content">
+            <h1>Crafting Digital Experiences That Inspire.</h1>
+            <p>Nova Creative is a digital agency fueled by creativity and driven by results. We partner with ambitious brands to design, develop, and market exceptional digital experiences.</p>
+            <a href="#portfolio" class="button primary-button">Explore Our Work</a>
+            <a href="#contact" class="button secondary-button">Get a Free Consultation</a>
+        </div>
+        <div class="hero-image">
+            <img src="placeholder-hero.jpg" alt="Hero Image - Creative Workspace">
+        </div>
+    </section>
+
+    <section id="services" class="services-section">
+        <div class="section-header">
+            <h2>Our Expertise</h2>
+            <p>We offer a comprehensive suite of digital services to elevate your brand and achieve your business objectives.</p>
+        </div>
+        <div class="services-grid">
+            <div class="service-card">
+                <i class="fas fa-code"></i>
+                <h3>Web Design & Development</h3>
+                <p>From responsive websites to complex web applications, we build digital experiences that are both beautiful and functional. We focus on user experience, performance, and scalability to ensure your website is a powerful asset.</p>
+                <ul class="service-details">
+                    <li><i class="fas fa-check-circle"></i> Responsive Design</li>
+                    <li><i class="fas fa-check-circle"></i> E-commerce Solutions</li>
+                    <li><i class="fas fa-check-circle"></i> Custom Web Applications</li>
+                    <li><i class="fas fa-check-circle"></i> CMS Integration</li>
+                </ul>
+            </div>
+            <div class="service-card">
+                <i class="fas fa-palette"></i>
+                <h3>Branding & Identity</h3>
+                <p>We create and revitalize brands that stand out and connect with your target audience. Our branding services encompass logo design, visual identity systems, brand guidelines, and brand messaging to ensure a cohesive and impactful brand presence.</p>
+                <ul class="service-details">
+                    <li><i class="fas fa-check-circle"></i> Logo Design</li>
+                    <li><i class="fas fa-check-circle"></i> Brand Guidelines</li>
+                    <li><i class="fas fa-check-circle"></i> Visual Identity Systems</li>
+                    <li><i class="fas fa-check-circle"></i> Brand Messaging</li>
+                </ul>
+            </div>
+            <div class="service-card">
+                <i class="fas fa-bullhorn"></i>
+                <h3>Digital Marketing</h3>
+                <p>We develop data-driven digital marketing strategies to increase your online visibility, drive traffic, and convert leads. Our services include SEO, social media marketing, paid advertising, content marketing, and email marketing.</p>
+                <ul class="service-details">
+                    <li><i class="fas fa-check-circle"></i> Search Engine Optimization (SEO)</li>
+                    <li><i class="fas fa-check-circle"></i> Social Media Marketing</li>
+                    <li><i class="fas fa-check-circle"></i> Paid Advertising (PPC)</li>
+                    <li><i class="fas fa-check-circle"></i> Content Marketing</li>
+                </ul>
+            </div>
+            <div class="service-card">
+                <i class="fas fa-video"></i>
+                <h3>Video Production & Animation</h3>
+                <p>Engage your audience with compelling video content. We offer video production services from concept to final cut, including promotional videos, explainer videos, animated videos, and social media video content. We help you tell your story visually.</p>
+                <ul class="service-details">
+                    <li><i class="fas fa-check-circle"></i> Promotional Videos</li>
+                    <li><i class="fas fa-check-circle"></i> Explainer Videos</li>
+                    <li><i class="fas fa-check-circle"></i> Animated Videos</li>
+                    <li><i class="fas fa-check-circle"></i> Social Media Videos</li>
+                </ul>
+            </div>
+        </div>
+    </section>
+
+    <section id="portfolio" class="portfolio-section">
+        <div class="section-header">
+            <h2>Our Recent Projects</h2>
+            <p>A selection of our latest and most impactful projects. <span id="portfolio-filter-controls">Filter by: <button class="filter-button active-filter" data-filter="all">All</button> <button class="filter-button" data-filter="web">Web Design</button> <button class="filter-button" data-filter="branding">Branding</button> <button class="filter-button" data-filter="marketing">Marketing</button> <button class="filter-button" data-filter="video">Video</button></span></p>
+        </div>
+        <div class="portfolio-grid">
+            <div class="portfolio-item" data-category="web branding">
+                <img src="placeholder-portfolio-1.jpg" alt="Project 1">
+                <div class="portfolio-overlay">
+                    <h3>Project Title 1</h3>
+                    <p class="portfolio-category">Web Design, Branding</p>
+                    <p>Brief description of the project and its key achievements.</p>
+                    <a href="#" class="button secondary-button">View Project</a>
+                </div>
+            </div>
+            <div class="portfolio-item" data-category="marketing video">
+                <img src="placeholder-portfolio-2.jpg" alt="Project 2">
+                <div class="portfolio-overlay">
+                    <h3>Project Title 2</h3>
+                    <p class="portfolio-category">Digital Marketing, Video</p>
+                    <p>Brief description of the project and its key achievements.</p>
+                    <a href="#" class="button secondary-button">View Project</a>
+                </div>
+            </div>
+            <div class="portfolio-item" data-category="branding web">
+                <img src="placeholder-portfolio-3.jpg" alt="Project 3">
+                <div class="portfolio-overlay">
+                    <h3>Project Title 3</h3>
+                    <p class="portfolio-category">Branding, Web Development</p>
+                    <p>Brief description of the project and its key achievements.</p>
+                    <a href="#" class="button secondary-button">View Project</a>
+                </div>
+            </div>
+            <div class="portfolio-item" data-category="web marketing">
+                <img src="placeholder-portfolio-4.jpg" alt="Project 4">
+                <div class="portfolio-overlay">
+                    <h3>Project Title 4</h3>
+                    <p class="portfolio-category">Web Design, SEO</p>
+                    <p>Brief description of the project and its key achievements.</p>
+                    <a href="#" class="button secondary-button">View Project</a>
+                </div>
+            </div>
+            <div class="portfolio-item" data-category="branding video">
+                <img src="placeholder-portfolio-5.jpg" alt="Project 5">
+                <div class="portfolio-overlay">
+                    <h3>Project Title 5</h3>
+                    <p class="portfolio-category">Branding, Video Production</p>
+                    <p>Brief description of the project and its key achievements.</p>
+                    <a href="#" class="button secondary-button">View Project</a>
+                </div>
+            </div>
+            <div class="portfolio-item" data-category="marketing web">
+                <img src="placeholder-portfolio-6.jpg" alt="Project 6">
+                <div class="portfolio-overlay">
+                    <h3>Project Title 6</h3>
+                    <p class="portfolio-category">Digital Marketing, Web Development</p>
+                    <p>Brief description of the project and its key achievements.</p>
+                    <a href="#" class="button secondary-button">View Project</a>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section id="testimonials" class="testimonials-section">
+        <div class="section-header">
+            <h2>What Our Clients Say</h2>
+            <p>Kind words from businesses we've partnered with.</p>
+        </div>
+        <div class="testimonials-slider">
+            <div class="testimonial">
+                <div class="testimonial-content">
+                    <p>"Working with Nova Creative has been a game-changer for our business. Their web design expertise and digital marketing strategies have significantly increased our online presence and customer engagement. Highly recommended!"</p>
+                </div>
+                <div class="testimonial-author">
+                    <img src="placeholder-testimonial-1.jpg" alt="Client 1">
+                    <div class="author-info">
+                        <h3>John Doe</h3>
+                        <p>CEO, Example Company</p>
+                    </div>
+                </div>
+            </div>
+            <div class="testimonial">
+                <div class="testimonial-content">
+                    <p>"The branding work Nova Creative did for us was exceptional. They truly captured the essence of our brand and created a visual identity that resonates with our target audience. We've seen a significant improvement in brand recognition since launch."</p>
+                </div>
+                <div class="testimonial-author">
+                    <img src="placeholder-testimonial-2.jpg" alt="Client 2">
+                    <div class="author-info">
+                        <h3>Jane Smith</h3>
+                        <p>Marketing Director, Another Corp</p>
+                    </div>
+                </div>
+            </div>
+            <div class="testimonial">
+                <div class="testimonial-content">
+                    <p>"Nova Creative's team is incredibly talented and professional. They delivered our video project on time and exceeded our expectations in terms of quality and creativity.  A pleasure to work with!"</p>
+                </div>
+                <div class="testimonial-author">
+                    <img src="placeholder-testimonial-3.jpg" alt="Client 3">
+                    <div class="author-info">
+                        <h3>Peter Jones</h3>
+                        <p>Founder, Startup Innovate</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+
+    <section id="about" class="about-section">
+        <div class="section-header">
+            <h2>About Nova Creative</h2>
+        </div>
+        <div class="about-content">
+            <div class="about-text">
+                <p>We are Nova Creative, a collective of designers, developers, strategists, and storytellers. We're passionate about crafting digital experiences that are not only visually stunning but also strategically effective.</p>
+                <p>Based in the heart of the digital innovation hub, our team thrives on challenges and embraces the ever-evolving landscape of the web. We believe in a collaborative approach, working closely with our clients to understand their unique needs and goals.  We're not just building websites and running campaigns; we're building partnerships and driving meaningful results.</p>
+                <p>What sets us apart?  It's our blend of creative flair and technical prowess. We're designers who understand code, and developers who appreciate aesthetics. This holistic approach ensures that every project we undertake is both beautifully crafted and functionally robust.</p>
+                <p>Let's talk about your next big idea. We're here to help you bring it to life and make a lasting impact.</p>
+                <a href="#contact" class="button secondary-button">Connect With Our Team</a>
+            </div>
+            <div class="about-image">
+                <img src="placeholder-about.jpg" alt="Team Image - Nova Creative Team">
+            </div>
+        </div>
+    </section>
+
+    <section id="contact" class="contact-section">
+        <div class="section-header">
+            <h2>Let's Start a Conversation</h2>
+            <p>Ready to discuss your project or have any questions? Get in touch with us today.</p>
+        </div>
+        <div class="contact-form">
+            <form id="contactForm" action="#" method="POST"> <!-- Replace "#" with your form submission endpoint -->
+                <div class="form-group">
+                    <label for="name">Your Name</label>
+                    <input type="text" id="name" name="name" placeholder="Your Name" required>
+                    <div class="error-message" id="name-error"></div>
+                </div>
+                <div class="form-group">
+                    <label for="email">Email Address</label>
+                    <input type="email" id="email" name="email" placeholder="Your Email" required>
+                    <div class="error-message" id="email-error"></div>
+                </div>
+                <div class="form-group">
+                    <label for="message">Your Message</label>
+                    <textarea id="message" name="message" rows="7" placeholder="Tell us about your project" required></textarea>
+                    <div class="error-message" id="message-error"></div>
+                </div>
+                <button type="submit" class="button primary-button">Send Message</button>
+                <div class="form-submission-message" id="submission-success">Thank you! Your message has been sent.</div>
+                <div class="form-submission-message error" id="submission-error">Oops! Something went wrong. Please try again later.</div>
+            </form>
+        </div>
+    </section>
+
+    <footer>
+        <div class="footer-content">
+            <div class="footer-logo-info">
+                <div class="footer-logo">Nova Creative</div>
+                <p>Inspiring Digital Futures.</p>
+            </div>
+            <div class="footer-contact-info">
+                <h3>Contact Us</h3>
+                <p>Email: <a href="mailto:info@novacreative.com">info@novacreative.com</a></p>
+                <p>Phone: +1-555-123-4567</p>
+                <p>Address: 123 Creative Lane, Digital City, USA</p>
+            </div>
+            <div class="footer-social-links">
+                <h3>Follow Us</h3>
+                <ul class="social-links">
+                    <li><a href="#" target="_blank"><i class="fab fa-facebook"></i></a></li>
+                    <li><a href="#" target="_blank"><i class="fab fa-twitter"></i></a></li>
+                    <li><a href="#" target="_blank"><i class="fab fa-linkedin"></i></a></li>
+                    <li><a href="#" target="_blank"><i class="fab fa-instagram"></i></a></li>
+                    <li><a href="#" target="_blank"><i class="fab fa-behance"></i></a></li>
+                </ul>
+            </div>
+        </div>
+        <div class="footer-bottom">
+            <p>&copy; 2023 Nova Creative. All rights reserved. | <a href="#">Privacy Policy</a> | <a href="#">Terms of Service</a></p>
+        </div>
+    </footer>
+
+    <script src="script.js"></script>
+</body>
+</html>
