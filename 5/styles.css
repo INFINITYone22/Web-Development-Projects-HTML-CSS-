@@ -1,0 +1,834 @@
+/* Reset and Basic Styles */
+*, *::before, *::after {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+body.dark-mode {
+    font-family: 'Montserrat', sans-serif;
+    line-height: 1.7;
+    color: #fff; /* Default text color for dark mode */
+    background-color: #181818; /* Dark background */
+    overflow-x: hidden; /* Prevent horizontal scroll for background animations */
+}
+
+a {
+    text-decoration: none;
+    color: inherit;
+    transition: color 0.3s ease;
+}
+
+a:hover, a:focus {
+    color: #00FFFF; /* Teal hover color */
+}
+
+ul {
+    list-style: none;
+}
+
+img {
+    max-width: 100%;
+    display: block;
+}
+
+/* --- Typography --- */
+h1, h2, h3 {
+    font-family: 'Bebas Neue', sans-serif;
+    font-weight: normal; /* Bebas Neue is already bold */
+    margin-bottom: 0.5em;
+    color: #fff;
+    letter-spacing: 0.08em; /* Slight letter spacing for headings */
+    text-transform: uppercase;
+    line-height: 1.1;
+}
+
+h1 { font-size: 4rem; }
+h2 { font-size: 3rem; }
+h3 { font-size: 2rem; }
+h4 { font-size: 1.4rem; margin-bottom: 0.4em; font-weight: 500; color: #eee; }
+
+p {
+    margin-bottom: 1.3em;
+    color: #ddd;
+    font-weight: 400;
+    font-size: 1.05rem; /* Slightly larger body text */
+}
+
+/* --- Colors --- */
+:root {
+    --primary-color: #C77DFF; /* Electric Purple */
+    --secondary-color: #00FFFF; /* Teal/Cyan */
+    --accent-color: #DAFF33; /* Neon Yellow */
+    --dark-bg: #181818; /* Deep Gray */
+    --darker-bg: #121212; /* Even Deeper Gray */
+    --light-text: #fff;
+    --dark-text: #333;
+    --shadow-color: rgba(0, 0, 0, 0.2);
+}
+
+.primary-button {
+    background-color: var(--primary-color);
+    color: var(--dark-bg); /* Dark text on primary button */
+}
+
+.secondary-button {
+    background-color: transparent;
+    color: var(--light-text);
+    border: 2px solid var(--secondary-color);
+}
+
+.button {
+    display: inline-block;
+    padding: 14px 35px;
+    border-radius: 7px;
+    font-weight: 600;
+    transition: background-color 0.3s ease, color 0.3s ease, transform 0.3s ease, border-color 0.3s ease;
+    border: none;
+    cursor: pointer;
+    text-align: center;
+    box-shadow: 0 3px 8px var(--shadow-color);
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+}
+
+.button:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 6px 12px var(--shadow-color);
+}
+
+.button:active {
+    transform: translateY(0);
+    box-shadow: 0 3px 8px var(--shadow-color);
+}
+
+.primary-button:hover {
+    background-color: #b060e0; /* Slightly darker purple on hover */
+}
+
+.secondary-button:hover {
+    color: var(--dark-bg);
+    background-color: var(--secondary-color);
+    border-color: var(--secondary-color);
+}
+
+
+/* --- Layout --- */
+header {
+    background-color: var(--darker-bg); /* Slightly darker header */
+    padding: 25px 0;
+    box-shadow: 0 3px 10px var(--shadow-color);
+    position: sticky;
+    top: 0;
+    z-index: 100;
+}
+
+nav {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    max-width: 1300px; /* Wider container */
+    margin: 0 auto;
+    padding: 0 40px; /* More side padding */
+}
+
+.logo {
+    font-size: 2.4rem;
+    font-weight: normal;
+    color: var(--light-text);
+    letter-spacing: 0.1em;
+}
+
+nav ul {
+    display: flex;
+}
+
+nav ul li {
+    margin-left: 45px; /* More spacing between nav items */
+}
+
+nav ul li a {
+    color: var(--light-text);
+    font-weight: 500;
+    padding: 10px 15px;
+    border-radius: 5px;
+    transition: color 0.3s ease;
+    position: relative; /* For pseudo-element underline */
+}
+
+nav ul li a::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 0%;
+    height: 2px;
+    background-color: var(--secondary-color);
+    transition: width 0.3s ease;
+}
+
+nav ul li a:hover::after,
+nav ul li a:focus::after {
+    width: 100%;
+}
+
+
+section {
+    padding: 120px 0; /* Increased section padding */
+    max-width: 1300px;
+    margin: 0 auto;
+    padding-left: 40px;
+    padding-right: 40px;
+    position: relative; /* For pseudo-element background */
+    overflow: hidden; /* Clip background pseudo-element */
+}
+
+section::before { /* Subtle geometric background pattern */
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-image: repeating-linear-gradient(45deg, rgba(255,255,255,0.02), rgba(255,255,255,0.02) 5px, transparent 5px, transparent 10px);
+    opacity: 0.05;
+    z-index: -1; /* Behind content */
+}
+
+
+.section-header {
+    text-align: center;
+    margin-bottom: 70px;
+}
+
+.section-header h2 {
+    font-size: 3.5rem;
+    margin-bottom: 0.3em;
+}
+
+.section-header p {
+    max-width: 800px;
+    margin: 20px auto;
+    color: #bbb;
+    font-size: 1.1rem;
+}
+
+.hero-section {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    min-height: 90vh; /* Almost full viewport height */
+    padding-top: 0;
+    padding-bottom: 0;
+    background: linear-gradient(to bottom, var(--darker-bg) 0%, var(--dark-bg) 100%); /* Dark gradient hero background */
+    position: relative;
+    overflow: hidden; /* Clip gradient animation */
+}
+
+.hero-section::before { /* Animated gradient background */
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 200%;
+    height: 200%;
+    background: linear-gradient(45deg, #C77DFF, #00FFFF, #DAFF33, #FF69B4, #C77DFF); /* Vibrant gradient */
+    background-size: 400% 400%;
+    animation: gradientAnimation 15s infinite linear;
+    opacity: 0.2;
+    z-index: -2; /* Behind content and section background */
+}
+
+@keyframes gradientAnimation {
+    0% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
+    100% { background-position: 0% 50%; }
+}
+
+
+.hero-content {
+    flex: 1;
+    max-width: 60%;
+    margin-right: 60px;
+    padding-top: 15vh; /* Vertical padding for hero content */
+    padding-bottom: 15vh;
+}
+
+.hero-image {
+    flex: 1;
+    max-width: 40%;
+    border-radius: 10px;
+    overflow: hidden;
+    box-shadow: 0 10px 30px var(--shadow-color);
+}
+
+.hero-content h1 {
+    font-size: 5rem;
+    line-height: 1;
+    margin-bottom: 0.4em;
+}
+
+.hero-content p {
+    font-size: 1.2rem;
+    color: #eee;
+    max-width: 90%;
+}
+
+.hero-content .button {
+    margin-top: 35px;
+}
+
+
+.services-section {
+    background-color: var(--dark-bg);
+    padding-bottom: 140px; /* More bottom padding for services */
+}
+
+/* --- New Nexus Services Section Styles --- */
+
+.nexus-services {
+    background-color: var(--darker-bg); /* Darker background for Nexus section */
+    padding-bottom: 200px; /* More bottom padding */
+    overflow: visible; /* Allow connections to extend beyond section bounds */
+    position: relative; /* For background animation */
+}
+
+.nexus-services::before { /* Animated noise texture background */
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-image: url('data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAgAAAAICAYAAADED76LAAAAJUlEQVQIW2P8////fwY4AwABlB34+8/x7wAAAAASUVORK5CYII='); /* Very subtle noise texture */
+    opacity: 0.1;
+    animation: noiseAnimation 0.5s steps(5) infinite;
+    z-index: -1;
+    pointer-events: none; /* Allow clicks through to content */
+}
+
+@keyframes noiseAnimation {
+    0% { background-position: 0 0; }
+    100% { background-position: 100px 100px; } /* Shift position to create animation */
+}
+
+
+.nexus-container {
+    position: relative;
+    width: 600px; /* Adjust size as needed */
+    height: 600px;
+    margin: 60px auto 0; /* Center container */
+    border-radius: 50%; /* Make it circular */
+    /* background-color: rgba(255, 255, 255, 0.03); /* Optional: Subtle circle background */ */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.nexus-center {
+    position: absolute;
+    width: 40px;
+    height: 40px;
+    background-color: var(--secondary-color); /* Teal center point */
+    border-radius: 50%;
+    z-index: 2; /* Above connections and cards */
+    box-shadow: 0 0 20px var(--secondary-color), 0 0 50px var(--secondary-color); /* Glow effect */
+}
+
+.nexus-service-card {
+    position: absolute;
+    width: 200px; /* Card width */
+    padding: 30px;
+    background-color: var(--dark-bg);
+    border-radius: 15px;
+    box-shadow: 0 8px 20px var(--shadow-color);
+    text-align: center;
+    transform-origin: center center; /* Rotate around center */
+    transition: transform 0.5s cubic-bezier(0.68, -0.55, 0.27, 1.55), box-shadow 0.3s ease, background-color 0.3s ease;
+    border: 2px solid transparent;
+    z-index: 1; /* Below center point but above background */
+    pointer-events: auto; /* Make cards interactive */
+    cursor: pointer;
+    --card-distance: 280px; /* Distance from center */
+}
+
+/* Dynamically position cards using CSS variables and rotate */
+.nexus-service-card {
+    transform: rotate(calc(var(--card-angle))) translateY(var(--card-distance));
+}
+
+.nexus-service-card:nth-child(1) { --connection-angle: 0deg; } /* Angle for connections */
+.nexus-service-card:nth-child(2) { --connection-angle: 60deg; }
+.nexus-service-card:nth-child(3) { --connection-angle: 120deg; }
+.nexus-service-card:nth-child(4) { --connection-angle: 180deg; }
+
+
+.nexus-service-card::before { /* Connection lines */
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 0;
+    width: var(--card-distance); /* Connection length */
+    height: 2px;
+    background: linear-gradient(to right, transparent, var(--secondary-color)); /* Glowing gradient line */
+    transform-origin: left center;
+    transform: rotate(var(--connection-angle)) translateX(-50%); /* Rotate and position */
+    z-index: -1; /* Behind card content */
+    opacity: 0.6; /* Slightly transparent */
+    transition: opacity 0.3s ease, width 0.3s ease; /* Transition for hover */
+}
+
+
+.nexus-service-card:hover {
+    transform: rotate(calc(var(--card-angle))) translateY(calc(var(--card-distance) - 15px)) scale(1.05); /* Slight upward movement and scale on hover */
+    box-shadow: 0 12px 30px var(--shadow-color), 0 0 30px var(--primary-color); /* Stronger shadow and primary color glow */
+    background-color: var(--darker-bg); /* Slightly lighter background on hover */
+    border-color: var(--primary-color); /* Primary color border on hover */
+    z-index: 3; /* Bring to front on hover */
+}
+
+.nexus-service-card:hover::before {
+    opacity: 1; /* Connection line becomes more opaque on hover */
+    width: calc(var(--card-distance) + 20px); /* Connection line extends slightly on hover */
+}
+
+
+.nexus-service-card i {
+    font-size: 3rem;
+    color: var(--primary-color);
+    margin-bottom: 20px;
+    display: inline-block;
+    transition: transform 0.5s ease, color 0.5s ease; /* Icon hover animation */
+}
+
+.nexus-service-card:hover i {
+    transform: rotate(calc(360deg * 2)) scale(1.3); /* More dramatic icon rotation and scale on hover */
+    color: var(--accent-color); /* Accent color for icon on hover */
+}
+
+.nexus-service-card h3 {
+    font-size: 1.7rem;
+    margin-bottom: 0.3em;
+}
+
+.nexus-service-card p {
+    font-size: 0.95rem;
+    color: #ccc;
+}
+
+
+.portfolio-section {
+    background-color: var(--darker-bg);
+    padding-bottom: 160px; /* Even more bottom padding for portfolio */
+}
+
+.portfolio-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(420px, 1fr)); /* Wider portfolio items */
+    gap: 40px;
+    margin-top: 70px;
+}
+
+.portfolio-item {
+    position: relative;
+    overflow: hidden;
+    border-radius: 12px;
+    box-shadow: 0 8px 18px var(--shadow-color);
+    transition: box-shadow 0.3s ease;
+}
+
+.portfolio-item:hover {
+    box-shadow: 0 15px 28px var(--shadow-color);
+}
+
+.portfolio-item img {
+    transition: transform 0.7s ease;
+    filter: grayscale(80%); /* Slightly desaturated portfolio images */
+}
+
+.portfolio-item:hover img {
+    transform: scale(1.05);
+    filter: grayscale(0%); /* Remove grayscale on hover */
+}
+
+.portfolio-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.8); /* Darker overlay */
+    color: var(--light-text);
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+    padding: 40px;
+    opacity: 0;
+    transition: opacity 0.5s ease;
+}
+
+.portfolio-item:hover .portfolio-overlay {
+    opacity: 1;
+}
+
+.portfolio-overlay h3 {
+    color: var(--light-text);
+    margin-bottom: 0.5em;
+    font-size: 2rem;
+}
+
+.portfolio-overlay p {
+    color: #ddd;
+    margin-bottom: 2em;
+    font-size: 1.1rem;
+    line-height: 1.6;
+}
+
+
+.about-section {
+    background-color: var(--dark-bg);
+    padding-bottom: 180px; /* Even more bottom padding for about */
+}
+
+.about-content {
+    display: flex;
+    align-items: center;
+    gap: 80px; /* Increased gap */
+}
+
+.about-text {
+    flex: 1.7;
+}
+
+.about-image {
+    flex: 1;
+    max-width: 500px; /* Adjust image size as needed */
+    border-radius: 15px;
+    overflow: hidden;
+    box-shadow: 0 10px 25px var(--shadow-color);
+}
+
+
+.contact-section {
+    background-color: var(--darker-bg);
+    text-align: center;
+    padding-bottom: 200px; /* Max bottom padding for contact */
+}
+
+.contact-form {
+    max-width: 800px; /* Wider contact form */
+    margin: 50px auto 0; /* More top margin */
+    text-align: left;
+    padding: 60px; /* Increased padding */
+    background-color: var(--dark-bg);
+    border-radius: 15px;
+    box-shadow: 0 10px 25px var(--shadow-color); /* Stronger shadow */
+}
+
+.form-group {
+    margin-bottom: 30px; /* More spacing between form groups */
+}
+
+.form-group label {
+    display: block;
+    margin-bottom: 12px;
+    font-weight: 500;
+    color: #eee;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    font-size: 0.9rem;
+}
+
+.form-group input, .form-group textarea {
+    width: 100%;
+    padding: 18px; /* Larger input padding */
+    border: 2px solid #555;
+    background-color: transparent;
+    border-radius: 8px;
+    font-family: inherit;
+    font-size: 1.1rem;
+    color: #fff;
+    transition: border-color 0.3s ease, box-shadow 0.3s ease;
+}
+
+.form-group input:focus, .form-group textarea:focus {
+    border-color: var(--secondary-color);
+    box-shadow: 0 0 0 3px rgba(0, 255, 255, 0.3); /* Teal focus ring */
+    outline: none; /* Remove default outline */
+}
+
+.form-group textarea {
+    resize: vertical;
+}
+
+.error-message {
+    color: #FF69B4; /* Hot Pink error color */
+    font-size: 0.9rem;
+    margin-top: 6px;
+    display: none; /* Initially hidden */
+}
+
+.form-submission-message {
+    margin-top: 25px;
+    padding: 18px;
+    border-radius: 8px;
+    text-align: center;
+    display: none; /* Hidden by default */
+    font-weight: 500;
+}
+
+.form-submission-message.success {
+    background-color: rgba(0, 255, 255, 0.1); /* Teal success background */
+    color: var(--secondary-color);
+    border: 2px solid var(--secondary-color);
+}
+
+.form-submission-message.error {
+    background-color: rgba(255, 105, 180, 0.1); /* Hot Pink error background */
+    color: #FF69B4;
+    border: 2px solid #FF69B4;
+}
+
+
+footer {
+    background-color: var(--darker-bg);
+    color: #bbb;
+    padding: 80px 0 60px; /* Adjusted footer padding */
+    border-top: 1px solid #333;
+}
+
+footer .footer-content {
+    max-width: 1300px;
+    margin: 0 auto;
+    padding: 0 40px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 30px;
+}
+
+footer p {
+    font-size: 0.95rem;
+    color: #999;
+    margin-bottom: 0; /* Remove default paragraph margin */
+}
+
+.social-links {
+    display: flex;
+    justify-content: flex-end; /* Align to right in footer */
+}
+
+.social-links li {
+    margin: 0 18px;
+}
+
+.social-links a {
+    color: #bbb;
+    font-size: 1.5rem;
+    transition: color 0.3s ease, transform 0.3s ease;
+}
+
+.social-links a:hover, .social-links a:focus {
+    color: var(--secondary-color);
+    transform: scale(1.2); /* Slightly enlarge on hover */
+}
+
+
+/* --- Responsive Design --- */
+@media (max-width: 1200px) {
+    .hero-section {
+        flex-direction: column;
+        text-align: center;
+        padding-top: 120px;
+        padding-bottom: 120px;
+    }
+    .hero-content {
+        max-width: 90%;
+        margin-right: 0;
+        margin-bottom: 60px;
+        padding-top: 10vh;
+        padding-bottom: 0; /* Adjust vertical padding on smaller screens */
+    }
+    .hero-image {
+        max-width: 80%;
+        margin: 0 auto;
+    }
+
+    .about-content {
+        flex-direction: column;
+        text-align: center;
+        gap: 60px;
+    }
+    .about-image {
+        max-width: 80%;
+        margin: 0 auto 50px;
+    }
+}
+
+@media (max-width: 960px) {
+    h1 { font-size: 4rem; }
+    h2 { font-size: 2.6rem; }
+    h3 { font-size: 1.8rem; }
+
+    nav ul {
+        display: none; /* Hide nav on smaller screens - consider hamburger menu */
+    }
+
+    nav {
+        justify-content: center; /* Center logo if nav hidden */
+    }
+
+    section {
+        padding: 100px 0;
+    }
+
+    .hero-section {
+        padding-top: 100px;
+        padding-bottom: 100px;
+    }
+
+    .services-grid {
+        grid-template-columns: 1fr; /* Stack services on smaller screens */
+    }
+
+    .portfolio-grid {
+        grid-template-columns: 1fr; /* Stack portfolio items */
+    }
+
+    .about-content {
+        gap: 50px;
+    }
+
+    .contact-form {
+        padding: 45px;
+    }
+}
+
+@media (max-width: 768px) {
+    h1 { font-size: 3rem; }
+    h2 { font-size: 2.2rem; }
+    h3 { font-size: 1.5rem; }
+
+    section {
+        padding: 80px 0;
+    }
+
+    .hero-content h1 {
+        font-size: 3.5rem; /* Further reduce hero heading size */
+    }
+
+    .service-card {
+        padding: 40px;
+    }
+
+    .portfolio-overlay {
+        padding: 30px;
+    }
+
+    .contact-form {
+        padding: 35px;
+    }
+
+    .footer-content {
+        flex-direction: column;
+        text-align: center;
+    }
+
+    .social-links {
+        justify-content: center; /* Center social icons on mobile */
+        margin-top: 25px;
+    }
+}
+
+@media (max-width: 576px) {
+    h1 { font-size: 2.6rem; }
+    h2 { font-size: 2rem; }
+    h3 { font-size: 1.3rem; }
+
+    section {
+        padding: 70px 0;
+    }
+
+    .service-card {
+        padding: 30px;
+    }
+
+    .portfolio-overlay {
+        padding: 25px;
+    }
+
+    .contact-form {
+        padding: 30px;
+    }
+
+    footer {
+        padding: 70px 0 50px;
+    }
+}
+
+/* --- Responsive Adjustments for Nexus Services --- */
+@media (max-width: 960px) {
+    .nexus-container {
+        width: 500px;
+        height: 500px;
+        margin-top: 40px;
+    }
+    .nexus-service-card {
+        width: 180px;
+        padding: 25px;
+        --card-distance: 240px;
+    }
+    .nexus-service-card h3 {
+        font-size: 1.5rem;
+    }
+    .nexus-service-card i {
+        font-size: 2.5rem;
+        margin-bottom: 15px;
+    }
+}
+
+@media (max-width: 768px) {
+    .nexus-container {
+        width: 400px;
+        height: 400px;
+        margin-top: 30px;
+    }
+    .nexus-service-card {
+        width: 150px;
+        padding: 20px;
+        --card-distance: 190px;
+    }
+    .nexus-service-card h3 {
+        font-size: 1.3rem;
+    }
+    .nexus-service-card p {
+        font-size: 0.9rem;
+    }
+    .nexus-service-card i {
+        font-size: 2rem;
+        margin-bottom: 12px;
+    }
+
+    .section-header h2 {
+        font-size: 2.8rem;
+    }
+}
+
+@media (max-width: 576px) {
+    .nexus-container {
+        width: 300px;
+        height: 300px;
+        margin-top: 20px;
+    }
+    .nexus-service-card {
+        width: 120px;
+        padding: 15px;
+        --card-distance: 150px;
+    }
+    .nexus-service-card h3 {
+        font-size: 1.1rem;
+    }
+}
