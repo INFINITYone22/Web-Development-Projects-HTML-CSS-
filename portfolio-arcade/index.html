@@ -1,0 +1,732 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Portfolio Arcade - Level Select</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
+    <style>
+        /* CSS Variables for theme */
+        :root {
+            --arcade-bg: #1a1a2e; /* Dark Blue/Purple */
+            --arcade-text: #f0f0f0; /* Off-white */
+            --arcade-highlight: #ffdd44; /* Brighter Yellow */
+            --arcade-accent1: #00ffee; /* Brighter Cyan */
+            --arcade-accent2: #ff00ff; /* Magenta */
+            --arcade-border: #e0e0e0;
+            --font-arcade: 'Press Start 2P', cursive;
+            --pixel-size: 4px; /* Base size for pixel effects */
+            --screen-glow: 0 0 calc(var(--pixel-size) * 4) calc(var(--pixel-size) * 1) color-mix(in srgb, var(--arcade-highlight) 50%, transparent); /* Enhanced glow */
+        }
+
+        /* Basic Reset & Body Styling */
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        html, body {
+            height: 100%;
+            overflow: hidden; /* Prevent scrolling */
+            background-color: var(--arcade-bg);
+            /* Subtle background pattern */
+            background-image: linear-gradient(rgba(255,255,255,0.02) 1px, transparent 1px),
+                              linear-gradient(90deg, rgba(255,255,255,0.02) 1px, transparent 1px);
+            background-size: calc(var(--pixel-size) * 10) calc(var(--pixel-size) * 10);
+            color: var(--arcade-text);
+            font-family: var(--font-arcade);
+            font-size: 10px; /* Base font size for easier pixel math, adjust as needed */
+            line-height: 1.6;
+        }
+
+        /* Main container */
+        .arcade-machine {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100%;
+            padding: calc(var(--pixel-size) * 4);
+            position: relative;
+        }
+
+        /* Screen area */
+        .screen {
+            width: 100%;
+            max-width: 800px; /* Adjust max width as needed */
+            height: 75vh; /* Adjust height as needed */
+            background-color: #050508; /* Slightly darker black */
+            border: calc(var(--pixel-size) * 2) solid var(--arcade-border);
+            /* Enhanced shadows for depth */
+            box-shadow: inset 0 0 calc(var(--pixel-size) * 8) rgba(0,0,0,0.8), /* Deeper inner shadow */
+                        var(--screen-glow); /* Use variable for glow */
+            position: relative;
+            overflow: hidden; /* Hide content outside the screen */
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            image-rendering: pixelated; /* Keep pixels sharp */
+            margin-bottom: calc(var(--pixel-size) * 3); /* Space for hint and copyright */
+            border-radius: calc(var(--pixel-size) * 1); /* Very slight rounding */
+        }
+
+        /* Screen Vignette Effect */
+        .screen::before {
+            content: "";
+            position: absolute;
+            top: 0; left: 0; right: 0; bottom: 0;
+            /* Subtle radial gradient for vignette */
+            background-image: radial-gradient(ellipse at center, rgba(0,0,0,0) 60%, rgba(0,0,0,0.5) 100%);
+            z-index: 2; /* Above content, below scanlines */
+            pointer-events: none;
+        }
+
+
+        /* Optional CRT Scanline Effect */
+        .screen::after {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.25) 50%), linear-gradient(90deg, rgba(255, 0, 0, 0.06), rgba(0, 255, 0, 0.02), rgba(0, 0, 255, 0.06));
+            background-size: 100% calc(var(--pixel-size) * 0.75), calc(var(--pixel-size) * 0.75) 100%; /* Thinner lines */
+            z-index: 100;
+            pointer-events: none;
+            animation: flicker 0.15s infinite;
+            opacity: 0.8; /* Make scanlines slightly more visible */
+        }
+        @keyframes flicker { /* Keep flicker subtle */
+          0% { opacity: 0.7; }
+          50% { opacity: 0.8; }
+          100% { opacity: 0.7; }
+        }
+
+
+        /* Game Sections (Levels) */
+        .game-section {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            padding: calc(var(--pixel-size) * 5);
+            display: none; /* Hidden by default */
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            opacity: 0;
+            transition: opacity 0.3s ease-in-out;
+            z-index: 3; /* Above vignette, below player */
+            /* Subtle background for active section */
+            /* background: radial-gradient(ellipse at center, rgba(0,0,0,0.1) 0%, rgba(0,0,0,0) 70%); */
+        }
+        .game-section.active {
+            display: flex;
+            opacity: 1;
+            z-index: 5; /* Bring active section forward */
+        }
+
+        /* Section Titles */
+        .section-title {
+            font-size: calc(var(--pixel-size) * 5);
+            color: var(--arcade-highlight);
+            margin-bottom: calc(var(--pixel-size) * 5);
+            text-shadow: calc(var(--pixel-size) / 1.5) calc(var(--pixel-size) / 1.5) var(--arcade-accent2); /* Slightly adjusted shadow */
+            animation: bounce 1s infinite alternate;
+            letter-spacing: calc(var(--pixel-size) * 0.5); /* Add spacing */
+        }
+         @keyframes bounce {
+            from { transform: translateY(0); text-shadow: calc(var(--pixel-size) / 1.5) calc(var(--pixel-size) / 1.5) var(--arcade-accent2); }
+            to { transform: translateY(calc(var(--pixel-size) * -1)); text-shadow: calc(var(--pixel-size) / 1.5) calc(var(--pixel-size) / 1) var(--arcade-accent2), 0 0 calc(var(--pixel-size) * 2) color-mix(in srgb, var(--arcade-highlight) 30%, transparent); } /* Add subtle glow on bounce up */
+        }
+
+
+        /* Content Styling */
+        .section-content p {
+            font-size: calc(var(--pixel-size) * 2);
+            margin-bottom: calc(var(--pixel-size) * 3);
+            max-width: 90%;
+            text-shadow: 1px 1px 2px rgba(0,0,0,0.5); /* Subtle text shadow for readability */
+        }
+        .section-content a {
+            color: var(--arcade-accent1);
+            text-decoration: none;
+            transition: color 0.2s;
+        }
+         .section-content a:hover {
+             color: var(--arcade-highlight);
+             text-decoration: underline;
+             text-shadow: 0 0 calc(var(--pixel-size) * 2) var(--arcade-accent1);
+         }
+
+        /* Project Grid (Level Select) */
+        .project-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(calc(var(--pixel-size) * 35), 1fr)); /* Slightly larger items */
+            gap: calc(var(--pixel-size) * 4);
+            width: 100%;
+            max-width: 600px;
+            margin-top: calc(var(--pixel-size) * 3);
+        }
+
+        /* Project Item Button */
+        .project-item {
+            background-color: var(--arcade-accent1);
+            color: var(--arcade-bg);
+            padding: calc(var(--pixel-size) * 2.5); /* Slightly more padding */
+            border: none; /* Remove default border */
+            font-family: var(--font-arcade);
+            font-size: calc(var(--pixel-size) * 1.5);
+            cursor: pointer;
+            text-align: center;
+            transition: transform 0.1s ease, background-color 0.1s ease, box-shadow 0.1s ease;
+            /* Enhanced Pixelated border effect using box-shadow */
+            box-shadow:
+                /* Outer border */
+                0 calc(var(--pixel-size) * 1) 0 0 var(--arcade-text),
+                0 calc(var(--pixel-size) * -1) 0 0 var(--arcade-text),
+                calc(var(--pixel-size) * 1) 0 0 0 var(--arcade-text),
+                calc(var(--pixel-size) * -1) 0 0 0 var(--arcade-text),
+                /* Inner Bevel/Highlight */
+                inset calc(var(--pixel-size) * 0.5) calc(var(--pixel-size) * 0.5) 0 0 color-mix(in srgb, var(--arcade-accent1) 150%, white),
+                /* Inner Shadow */
+                inset calc(var(--pixel-size) * -0.5) calc(var(--pixel-size) * -0.5) 0 0 color-mix(in srgb, var(--arcade-accent1) 50%, black);
+        }
+        .project-item:hover {
+            background-color: var(--arcade-highlight);
+            color: var(--arcade-bg);
+            transform: scale(1.05) translateY(calc(var(--pixel-size) * -0.5)); /* Lift slightly */
+            box-shadow:
+                /* Outer border */
+                0 calc(var(--pixel-size) * 1) 0 0 var(--arcade-text),
+                0 calc(var(--pixel-size) * -1) 0 0 var(--arcade-text),
+                calc(var(--pixel-size) * 1) 0 0 0 var(--arcade-text),
+                calc(var(--pixel-size) * -1) 0 0 0 var(--arcade-text),
+                /* Inner Bevel/Highlight */
+                inset calc(var(--pixel-size) * 0.5) calc(var(--pixel-size) * 0.5) 0 0 color-mix(in srgb, var(--arcade-highlight) 150%, white),
+                /* Inner Shadow */
+                inset calc(var(--pixel-size) * -0.5) calc(var(--pixel-size) * -0.5) 0 0 color-mix(in srgb, var(--arcade-highlight) 50%, black),
+                 /* Outer Glow */
+                 0 calc(var(--pixel-size) * 1) calc(var(--pixel-size) * 2) 0 color-mix(in srgb, var(--arcade-highlight) 40%, transparent);
+        }
+        .project-item:active {
+            transform: scale(0.98) translateY(0); /* Press down */
+            background-color: color-mix(in srgb, var(--arcade-highlight) 80%, black);
+             box-shadow:
+                /* Outer border */
+                0 calc(var(--pixel-size) * 1) 0 0 var(--arcade-text),
+                0 calc(var(--pixel-size) * -1) 0 0 var(--arcade-text),
+                calc(var(--pixel-size) * 1) 0 0 0 var(--arcade-text),
+                calc(var(--pixel-size) * -1) 0 0 0 var(--arcade-text),
+                 /* Inner Shadow (stronger) */
+                inset calc(var(--pixel-size) * 0.5) calc(var(--pixel-size) * 0.5) 0 0 color-mix(in srgb, var(--arcade-highlight) 40%, black);
+        }
+
+        /* Player Character */
+        #player {
+            width: calc(var(--pixel-size) * 8);
+            height: calc(var(--pixel-size) * 8);
+            background-color: var(--arcade-accent2); /* Player color */
+            position: absolute;
+            z-index: 50; /* Above sections */
+            bottom: calc(var(--pixel-size) * 5); /* Position near bottom */
+            left: 50%; /* Start centered */
+            transform: translateX(-50%);
+            transition: left 0.3s ease-out; /* Smooth movement */
+            /* Enhanced Pixel look using box-shadow */
+            box-shadow:
+                /* Main Body */
+                0 0 0 calc(var(--pixel-size) * 1) var(--arcade-accent2), /* Center */
+                0 calc(var(--pixel-size) * -1) 0 0 var(--arcade-accent2), /* Top Middle */
+                0 calc(var(--pixel-size) * 1) 0 0 var(--arcade-accent2), /* Bottom Middle */
+                calc(var(--pixel-size) * -1) 0 0 0 var(--arcade-accent2), /* Left Middle */
+                calc(var(--pixel-size) * 1) 0 0 0 var(--arcade-accent2), /* Right Middle */
+                calc(var(--pixel-size) * -1) calc(var(--pixel-size) * 1) 0 0 var(--arcade-accent2), /* Bottom Left */
+                calc(var(--pixel-size) * 1) calc(var(--pixel-size) * 1) 0 0 var(--arcade-accent2), /* Bottom Right */
+                /* 'Eyes' or Detail */
+                calc(var(--pixel-size) * -1) calc(var(--pixel-size) * -1) 0 0 var(--arcade-highlight), /* Top Left Eye */
+                calc(var(--pixel-size) * 1) calc(var(--pixel-size) * -1) 0 0 var(--arcade-highlight), /* Top Right Eye */
+                /* Outline */
+                0 calc(var(--pixel-size) * 2) 0 0 #000, /* Bottom Outline */
+                0 calc(var(--pixel-size) * -2) 0 0 #000, /* Top Outline */
+                calc(var(--pixel-size) * 2) 0 0 0 #000, /* Right Outline */
+                calc(var(--pixel-size) * -2) 0 0 0 #000; /* Left Outline */
+
+            /* Add animation for idle state */
+             animation: player-idle 0.5s steps(2, end) infinite;
+        }
+
+        /* Player Idle Animation (simple up/down bob) */
+        @keyframes player-idle {
+            from { transform: translate(-50%, 0); }
+            to { transform: translate(-50%, calc(var(--pixel-size) * -0.5)); }
+        }
+
+        /* Navigation Hint */
+        .nav-hint {
+            width: 100%; /* Take full width */
+            text-align: center; /* Center text */
+            font-size: calc(var(--pixel-size) * 1.5);
+            color: var(--arcade-highlight);
+            opacity: 0.7;
+            animation: blink 1.5s infinite;
+            margin-top: calc(var(--pixel-size) * 1); /* Add some space above copyright */
+            margin-bottom: calc(var(--pixel-size) * 1);
+            text-shadow: 1px 1px 0 #000; /* Make text pop a bit */
+        }
+        @keyframes blink {
+            0%, 100% { opacity: 0.7; }
+            50% { opacity: 0.2; }
+        }
+
+        /* Copyright Notice */
+        .copyright {
+            width: 100%; /* Take full width */
+            text-align: center; /* Center text */
+            font-size: calc(var(--pixel-size) * 1.2); /* Slightly smaller */
+            color: var(--arcade-text);
+            opacity: 0.5; /* Less prominent */
+            margin-top: calc(var(--pixel-size) * 1);
+        }
+
+
+        /* Project Modal */
+        #project-modal {
+            position: fixed; /* Use fixed to overlay everything */
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(26, 26, 46, 0.9); /* Semi-transparent bg */
+            backdrop-filter: blur(calc(var(--pixel-size) * 1)); /* Add blur effect */
+            display: none; /* Hidden by default */
+            align-items: center;
+            justify-content: center;
+            z-index: 200; /* Above everything */
+            opacity: 0;
+            transition: opacity 0.3s ease-in-out;
+        }
+        #project-modal.visible {
+            display: flex;
+            opacity: 1;
+        }
+
+        .modal-content {
+            background-color: #000;
+            border: calc(var(--pixel-size) * 2) solid var(--arcade-accent1);
+            padding: calc(var(--pixel-size) * 6);
+            max-width: 90%;
+            width: 600px; /* Adjust as needed */
+            text-align: center;
+            position: relative;
+            box-shadow: 0 0 calc(var(--pixel-size) * 5) var(--arcade-accent1),
+                        inset 0 0 calc(var(--pixel-size) * 3) rgba(0,0,0,0.5);
+            transform: scale(0.95); /* Start slightly smaller for animation */
+            opacity: 0;
+            transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275), opacity 0.2s ease-out; /* Bounce animation */
+        }
+        #project-modal.visible .modal-content {
+             transform: scale(1);
+             opacity: 1;
+        }
+
+
+        .modal-title {
+            font-size: calc(var(--pixel-size) * 4);
+            color: var(--arcade-highlight);
+            margin-bottom: calc(var(--pixel-size) * 4);
+            text-shadow: calc(var(--pixel-size) / 1.5) calc(var(--pixel-size) / 1.5) var(--arcade-accent2);
+        }
+
+        .modal-body p {
+            font-size: calc(var(--pixel-size) * 2);
+            margin-bottom: calc(var(--pixel-size) * 3);
+        }
+         .modal-body a {
+             color: var(--arcade-accent2);
+             transition: color 0.2s, text-shadow 0.2s;
+         }
+         .modal-body a:hover {
+             color: var(--arcade-highlight);
+              text-shadow: 0 0 calc(var(--pixel-size) * 2) var(--arcade-accent2);
+         }
+
+        #close-modal {
+            position: absolute;
+            top: calc(var(--pixel-size) * -1);
+            right: calc(var(--pixel-size) * -1);
+            background-color: var(--arcade-accent2);
+            color: var(--arcade-text);
+            border: none; /* Remove default border */
+            font-family: var(--font-arcade);
+            font-size: calc(var(--pixel-size) * 2);
+            width: calc(var(--pixel-size) * 6);
+            height: calc(var(--pixel-size) * 6);
+            cursor: pointer;
+            line-height: calc(var(--pixel-size) * 4); /* Center 'X' */
+            transition: transform 0.1s ease, background-color 0.1s ease, box-shadow 0.1s ease;
+             box-shadow:
+                /* Outer border */
+                0 calc(var(--pixel-size) * 1) 0 0 var(--arcade-text),
+                0 calc(var(--pixel-size) * -1) 0 0 var(--arcade-text),
+                calc(var(--pixel-size) * 1) 0 0 0 var(--arcade-text),
+                calc(var(--pixel-size) * -1) 0 0 0 var(--arcade-text),
+                /* Inner Bevel/Highlight */
+                inset calc(var(--pixel-size) * 0.5) calc(var(--pixel-size) * 0.5) 0 0 color-mix(in srgb, var(--arcade-accent2) 150%, white),
+                /* Inner Shadow */
+                inset calc(var(--pixel-size) * -0.5) calc(var(--pixel-size) * -0.5) 0 0 color-mix(in srgb, var(--arcade-accent2) 50%, black);
+        }
+         #close-modal:hover {
+             background-color: var(--arcade-highlight);
+             color: var(--arcade-bg);
+             transform: rotate(90deg) scale(1.1);
+         }
+          #close-modal:active {
+            transform: rotate(90deg) scale(0.95);
+            background-color: color-mix(in srgb, var(--arcade-highlight) 80%, black);
+            box-shadow:
+                /* Outer border */
+                0 calc(var(--pixel-size) * 1) 0 0 var(--arcade-text),
+                0 calc(var(--pixel-size) * -1) 0 0 var(--arcade-text),
+                calc(var(--pixel-size) * 1) 0 0 0 var(--arcade-text),
+                calc(var(--pixel-size) * -1) 0 0 0 var(--arcade-text),
+                 /* Inner Shadow (stronger) */
+                inset calc(var(--pixel-size) * 0.5) calc(var(--pixel-size) * 0.5) 0 0 color-mix(in srgb, var(--arcade-highlight) 40%, black);
+        }
+
+    </style>
+</head>
+<body>
+    <div class="arcade-machine">
+        <div class="screen">
+            <div id="section-start" class="game-section active">
+                <h2 class="section-title">INSERT COIN</h2>
+                <div class="section-content">
+                    <p>Welcome to [Your Name]'s Portfolio Arcade!</p>
+                    <p>Use LEFT/RIGHT Arrow Keys to Navigate Levels.</p>
+                    <p>Press ENTER/SPACE on 'Projects' level to select.</p>
+                </div>
+            </div>
+
+            <div id="section-about" class="game-section">
+                <h2 class="section-title">PLAYER PROFILE</h2>
+                <div class="section-content">
+                    <p>Hi! I'm [Your Name], a passionate [Your Role - e.g., Web Developer / Designer] creating awesome digital experiences.</p>
+                    <p>I love blending creativity with code to build unique and engaging websites.</p>
+                     <p>Skills: HTML, CSS, JavaScript, [Add More Skills]...</p>
+                </div>
+            </div>
+
+            <div id="section-projects" class="game-section">
+                <h2 class="section-title">LEVEL SELECT</h2>
+                <div class="section-content">
+                    <p>Choose a project to view details.</p>
+                    <div class="project-grid">
+                        <button class="project-item" data-project="project1">Project Alpha</button>
+                        <button class="project-item" data-project="project2">Project Beta</button>
+                        <button class="project-item" data-project="project3">Gamma Initiative</button>
+                        <button class="project-item" data-project="project4">Delta Showcase</button>
+                         <button class="project-item" data-project="project5">Epsilon Task</button>
+                         <button class="project-item" data-project="project6">Zeta Experiment</button>
+                    </div>
+                </div>
+            </div>
+
+            <div id="section-contact" class="game-section">
+                <h2 class="section-title">CONTACT HQ</h2>
+                <div class="section-content">
+                    <p>Ready to start a new game (project)?</p>
+                    <p>Reach out via:</p>
+                    <p>Email: <a href="mailto:your.email@example.com">your.email@example.com</a></p>
+                    <p>LinkedIn: <a href="[Your LinkedIn URL]" target="_blank">Link</a></p>
+                     <p>GitHub: <a href="[Your GitHub URL]" target="_blank">Link</a></p>
+                </div>
+            </div>
+
+            <div id="player"></div>
+
+        </div> <div class="nav-hint">Use Arrow Keys < ></div>
+        <div class="copyright" id="copyright-notice">
+            &copy; <span id="current-year">2025</span> INFINITYone22. All Rights Reserved.
+        </div>
+
+    </div> <div id="project-modal">
+        <div class="modal-content">
+            <button id="close-modal">X</button>
+            <h3 id="modal-title" class="modal-title">PROJECT TITLE</h3>
+            <div id="modal-body" class="modal-body">
+                <p id="modal-description">Project description goes here...</p>
+                <p><strong>Tech Used:</strong> <span id="modal-tech">HTML, CSS, JS</span></p>
+                <p><a id="modal-link" href="#" target="_blank">View Live Demo</a></p>
+                <p><a id="modal-repo" href="#" target="_blank">View Code Repo</a></p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            // --- Game State & Elements ---
+            const sections = document.querySelectorAll('.game-section');
+            const player = document.getElementById('player');
+            const modal = document.getElementById('project-modal');
+            const closeModalButton = document.getElementById('close-modal');
+            const projectItems = document.querySelectorAll('.project-item');
+            const currentYearSpan = document.getElementById('current-year'); // Get span for year
+
+            // Define the order of sections
+            const sectionOrder = ['section-start', 'section-about', 'section-projects', 'section-contact'];
+            let currentSectionIndex = 0; // Start at the first section
+
+            // --- Project Data (Replace with your actual project details) ---
+            const projectData = {
+                project1: { title: "Project Alpha", description: "A cool web app that does amazing things using modern tech.", tech: "React, Node.js, MongoDB", link: "#", repo: "#" },
+                project2: { title: "Project Beta", description: "An interactive data visualization platform.", tech: "D3.js, Vanilla JS, CSS Grid", link: "#", repo: "#" },
+                project3: { title: "Gamma Initiative", description: "E-commerce site with a unique checkout experience.", tech: "HTML, CSS, JavaScript, Stripe API", link: "#", repo: "#" },
+                project4: { title: "Delta Showcase", description: "Portfolio website for a fictional photographer.", tech: "HTML, CSS, GSAP", link: "#", repo: "#" },
+                 project5: { title: "Epsilon Task", description: "A productivity tool built with efficiency in mind.", tech: "Vue.js, Firebase", link: "#", repo: "#" },
+                 project6: { title: "Zeta Experiment", description: "An experimental WebGL project exploring 3D graphics.", tech: "Three.js, WebGL", link: "#", repo: "#" },
+            };
+
+            // --- Audio Context for Sound Effects (Optional) ---
+            let audioCtx;
+            let isAudioContextResumed = false; // Flag to track if user interacted
+
+            // Function to initialize or resume AudioContext safely
+            function initAudioContext() {
+                if (!audioCtx) {
+                    try {
+                        audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+                        // Check initial state - might be suspended until user interaction
+                         if (audioCtx.state === 'suspended') {
+                             console.log("AudioContext suspended. Waiting for user interaction.");
+                         } else {
+                             isAudioContextResumed = true; // Already running
+                         }
+                    } catch (e) {
+                        console.warn("Web Audio API is not supported in this browser.");
+                        return false; // Indicate failure
+                    }
+                }
+
+                // If context exists but is suspended, try resuming (only if user interacted)
+                if (audioCtx && audioCtx.state === 'suspended' && !isAudioContextResumed) {
+                    // Attempt resume only after first interaction (handled in event listeners)
+                    return true; // Context exists but needs resume
+                }
+                return audioCtx && audioCtx.state === 'running'; // Success if running
+            }
+
+             // Function to attempt resuming audio context on first interaction
+             function attemptAudioResume() {
+                 if (audioCtx && audioCtx.state === 'suspended' && !isAudioContextResumed) {
+                     audioCtx.resume().then(() => {
+                         console.log("AudioContext resumed successfully.");
+                         isAudioContextResumed = true;
+                     }).catch(err => console.error("AudioContext resume failed:", err));
+                 }
+             }
+
+
+            // Function to play a simple sound
+            function playSound(type = 'move') {
+                if (!initAudioContext() || !isAudioContextResumed) {
+                     // Don't warn every time if context isn't ready yet
+                     // console.warn("AudioContext not ready or not resumed by user interaction.");
+                    return;
+                }
+
+                const oscillator = audioCtx.createOscillator();
+                const gainNode = audioCtx.createGain();
+
+                oscillator.connect(gainNode);
+                gainNode.connect(audioCtx.destination);
+
+                gainNode.gain.setValueAtTime(0.08, audioCtx.currentTime); // Slightly lower volume
+
+                if (type === 'move') {
+                    oscillator.type = 'square';
+                    oscillator.frequency.setValueAtTime(330, audioCtx.currentTime); // E4
+                    oscillator.frequency.linearRampToValueAtTime(440, audioCtx.currentTime + 0.05); // Slide up to A4
+                    gainNode.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.1);
+                    oscillator.stop(audioCtx.currentTime + 0.1);
+                } else if (type === 'select') {
+                    oscillator.type = 'sine';
+                    oscillator.frequency.setValueAtTime(660, audioCtx.currentTime); // E5
+                    oscillator.frequency.linearRampToValueAtTime(880, audioCtx.currentTime + 0.08); // Slide up to A5
+                    gainNode.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.15);
+                    oscillator.stop(audioCtx.currentTime + 0.15);
+                } else if (type === 'openModal') {
+                     oscillator.type = 'triangle';
+                     oscillator.frequency.setValueAtTime(523, audioCtx.currentTime); // C5
+                     oscillator.frequency.linearRampToValueAtTime(1046, audioCtx.currentTime + 0.15); // Slide up to C6
+                     gainNode.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.2);
+                     oscillator.stop(audioCtx.currentTime + 0.2);
+                } else if (type === 'closeModal') {
+                     oscillator.type = 'sawtooth';
+                     oscillator.frequency.setValueAtTime(440, audioCtx.currentTime); // A4
+                     oscillator.frequency.linearRampToValueAtTime(220, audioCtx.currentTime + 0.1); // Slide down to A3
+                     gainNode.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.15);
+                     oscillator.stop(audioCtx.currentTime + 0.15);
+                }
+
+                oscillator.start(audioCtx.currentTime);
+            }
+
+
+            // --- Navigation Logic ---
+            function navigate(direction) {
+                attemptAudioResume(); // Try resuming audio on interaction
+                let newIndex = currentSectionIndex;
+                if (direction === 'left') {
+                    newIndex = (currentSectionIndex > 0) ? currentSectionIndex - 1 : sectionOrder.length - 1; // Wrap around left
+                } else if (direction === 'right') {
+                    newIndex = (currentSectionIndex < sectionOrder.length - 1) ? currentSectionIndex + 1 : 0; // Wrap around right
+                }
+
+                if (newIndex !== currentSectionIndex) {
+                    currentSectionIndex = newIndex;
+                    updateScreen();
+                    playSound('move'); // Play sound on navigation
+                }
+            }
+
+            // --- Update Screen ---
+            function updateScreen() {
+                // Deactivate all sections
+                sections.forEach(section => section.classList.remove('active'));
+
+                // Activate the current section
+                const currentSectionId = sectionOrder[currentSectionIndex];
+                const currentSectionElement = document.getElementById(currentSectionId);
+                if (currentSectionElement) {
+                    currentSectionElement.classList.add('active');
+                }
+
+                // Update player position visually (example: move between fixed points)
+                const playerPositionPercentage = (currentSectionIndex / (sectionOrder.length -1)) * 80 + 10; // Map index to 10%-90% range
+                 // Check if player element exists before setting style
+                if (player) {
+                    player.style.left = `${playerPositionPercentage}%`;
+                } else {
+                     console.error("Player element not found!");
+                }
+            }
+
+            // --- Modal Logic ---
+            function openModal(projectId) {
+                 attemptAudioResume(); // Try resuming audio on interaction
+                const data = projectData[projectId];
+                if (!data) return;
+
+                document.getElementById('modal-title').textContent = data.title;
+                document.getElementById('modal-description').textContent = data.description;
+                document.getElementById('modal-tech').textContent = data.tech;
+
+                const linkElement = document.getElementById('modal-link');
+                const repoElement = document.getElementById('modal-repo');
+
+                linkElement.href = data.link || '#';
+                linkElement.style.display = data.link ? 'inline-block' : 'none'; // Hide if no link
+
+                repoElement.href = data.repo || '#';
+                 repoElement.style.display = data.repo ? 'inline-block' : 'none'; // Hide if no repo link
+
+
+                modal.classList.add('visible');
+                playSound('openModal');
+            }
+
+            function closeModal() {
+                modal.classList.remove('visible');
+                playSound('closeModal');
+            }
+
+            // --- Event Listeners ---
+            document.addEventListener('keydown', (event) => {
+                 attemptAudioResume(); // Try resuming audio on interaction
+
+                // Prevent default arrow key scrolling
+                if (["ArrowLeft", "ArrowRight", "ArrowUp", "ArrowDown", "Space", "Enter"].includes(event.key)) {
+                     event.preventDefault();
+                }
+
+                // Check if modal is visible, if so, only allow Escape to close it
+                if (modal.classList.contains('visible')) {
+                    if (event.key === 'Escape') {
+                        closeModal();
+                    }
+                    return; // Ignore other keys when modal is open
+                }
+
+                // Handle navigation
+                switch (event.key) {
+                    case 'ArrowLeft':
+                        navigate('left');
+                        break;
+                    case 'ArrowRight':
+                        navigate('right');
+                        break;
+                    case 'Enter':
+                    case ' ': // Space bar
+                        // Allow selecting only on the projects section
+                        if (sectionOrder[currentSectionIndex] === 'section-projects') {
+                            // Placeholder: Select the first project for simplicity
+                            // In a real game, you'd add focus state and selection logic
+                             const firstProject = document.querySelector('.project-item');
+                             if (firstProject) {
+                                 playSound('select');
+                                 openModal(firstProject.dataset.project);
+                             }
+                        }
+                        break;
+                    case 'Escape':
+                        // Optional: Navigate back to start screen on Escape?
+                        // currentSectionIndex = 0;
+                        // updateScreen();
+                        break;
+                }
+            });
+
+            // Project item clicks
+            projectItems.forEach(item => {
+                item.addEventListener('click', () => {
+                     attemptAudioResume(); // Try resuming audio on interaction
+                    playSound('select');
+                    openModal(item.dataset.project);
+                });
+            });
+
+            // Close modal button
+            closeModalButton.addEventListener('click', () => {
+                 attemptAudioResume(); // Try resuming audio on interaction
+                 closeModal();
+            });
+
+            // Close modal on clicking background
+            modal.addEventListener('click', (event) => {
+                if (event.target === modal) { // Check if the click is on the backdrop itself
+                     attemptAudioResume(); // Try resuming audio on interaction
+                     closeModal();
+                }
+            });
+
+
+            // --- Initial Setup ---
+            // Set current year in copyright
+             if (currentYearSpan) {
+                currentYearSpan.textContent = new Date().getFullYear(); // Dynamically set year
+             }
+            updateScreen(); // Show the initial screen
+             initAudioContext(); // Initialize audio context on load
+
+        }); // End DOMContentLoaded
+    </script>
+
+</body>
+</html>

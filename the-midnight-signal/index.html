@@ -1,0 +1,408 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>The Midnight Signal</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Merriweather:wght@300;400;700&family=Lato:wght@300;400&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            /* Palette for Night Sky */
+            --bg-color-start: #0b132b; /* Deep Navy Blue */
+            --bg-color-end: #1c2541;   /* Slightly Lighter Deep Blue */
+            --text-color: #d0d0d0;
+            --accent-color: #6a0dad; /* Purple */
+            --accent-glow: rgba(106, 13, 173, 0.6);
+            --choice-hover-bg: rgba(106, 13, 173, 0.15);
+            --choice-border: rgba(106, 13, 173, 0.4);
+            --star-color: rgba(255, 255, 255, 0.8);
+        }
+
+        body {
+            background: linear-gradient(135deg, var(--bg-color-start), var(--bg-color-end));
+            color: var(--text-color);
+            font-family: 'Merriweather', serif;
+            line-height: 1.8;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            overflow: hidden;
+        }
+
+        /* Background effect container */
+        #background-effects {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+            overflow: hidden;
+        }
+        #bgCanvas {
+            display: block;
+            width: 100%;
+            height: 100%;
+        }
+
+        /* Main content container */
+        #story-container {
+            max-width: 700px;
+            width: 90%;
+            padding: 2rem;
+            position: relative;
+             background-color: rgba(11, 19, 43, 0.35); /* Slightly increased opacity */
+             backdrop-filter: blur(4px); /* Slightly more blur */
+             -webkit-backdrop-filter: blur(4px);
+             border-radius: 8px;
+             box-shadow: 0 0 30px rgba(0,0,0,0.35); /* Slightly stronger shadow */
+             /* Ensure content stays visible during transitions */
+             perspective: 1000px; /* For potential 3D transforms */
+        }
+
+        /* Wrapper for content that fades/transitions */
+        #story-content-wrapper {
+            position: relative; /* Needed for absolute positioning of old/new content */
+            min-height: 200px; /* Prevent container collapse during transition */
+        }
+
+        /* Narrative text styling */
+        .narrative-paragraph {
+            font-size: 1.1rem;
+            margin-bottom: 1.5rem;
+            /* Opacity/transform handled by GSAP */
+            color: var(--text-color);
+            text-shadow: 0 1px 3px rgba(0,0,0,0.5);
+        }
+        .narrative-paragraph strong {
+            font-weight: 700;
+            color: #f0f0f0;
+        }
+
+        /* Choices container */
+        #choices-container {
+            margin-top: 2.5rem;
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+             /* Opacity/transform handled by GSAP */
+        }
+
+        /* Choice button styling */
+        .choice-button {
+            background-color: rgba(28, 37, 65, 0.4);
+            border: 1px solid var(--choice-border);
+            color: var(--text-color);
+            padding: 0.8rem 1.5rem;
+            font-family: 'Lato', sans-serif;
+            font-size: 1rem;
+            text-align: left;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: background-color 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease, transform 0.1s ease;
+             /* Opacity/transform handled by GSAP */
+        }
+
+        .choice-button:hover {
+            background-color: var(--choice-hover-bg);
+            border-color: var(--accent-color);
+            box-shadow: 0 0 15px var(--accent-glow);
+        }
+         .choice-button:active {
+             transform: scale(0.93); /* Keep this for click feedback */
+         }
+
+    </style>
+</head>
+<body>
+
+    <div id="background-effects">
+        <canvas id="bgCanvas"></canvas>
+    </div>
+
+    <div id="story-container">
+        <div id="story-content-wrapper">
+            <div id="narrative-content">
+                </div>
+            <div id="choices-container">
+                </div>
+        </div>
+    </div>
+
+    <script>
+        // --- Story Data Structure ---
+        const story = { // (Keep existing story data structure)
+             start: { paragraphs: ["The rain hadn't stopped for three days. A relentless, grey curtain drawn across the city.", "Your small apartment felt more like a cage, the rhythmic drumming on the windowpane a constant reminder of the isolation.", "Then, piercing through the static of the old radio, came the signal. Not music, not voice, but a sequence... clean, precise, alien.", "It repeated, a pattern you instinctively felt held meaning. The air thickened. Your skin prickled."], choices: [{ text: "Try to decipher the pattern.", target: "decipher" }, { text: "Ignore it, turn off the radio.", target: "ignore" }] }, decipher: { paragraphs: ["You grabbed a notepad, scribbling down the sequence of pulses – long, short, short, long... It felt mathematical, binary perhaps.", "Hours seemed to melt away. The rain lashed against the glass, mirroring the storm of concentration in your mind.", "Suddenly, a fragment clicked. Coordinates? No... something else. A frequency.", "A specific, narrow band, far higher than this old radio should be able to receive. It wasn't *coming* from the radio, it was coming *through* it."], choices: [{ text: "Search for equipment to tune to the new frequency.", target: "search_equip" }, { text: "Focus harder on the original pattern's meaning.", target: "focus_pattern" }] }, ignore: { paragraphs: ["Just noise. Interference from the storm, likely.", "You reached over and clicked the radio off. Silence rushed in, heavy and immediate, broken only by the rain.", "But the pattern echoed in your mind, unwelcome. A seed of unease planted.", "You tried to read, but the words swam. Sleep seemed the only escape."], choices: [{ text: "Try to sleep.", target: "sleep_fail" }, { text: "Turn the radio back on, just to check.", target: "reconsider" }] }, search_equip: { paragraphs: ["The attic. Maybe grandfather's old ham radio gear..."], choices: [{text: "End placeholder", target: "start"}] }, focus_pattern: { paragraphs: ["Binary isn't right. What if it's tonal?"], choices: [{text: "End placeholder", target: "start"}] }, sleep_fail: { paragraphs: ["Sleep offered no refuge. The pattern pulsed behind your eyelids."], choices: [{text: "End placeholder", target: "start"}] }, reconsider: { paragraphs: ["Reluctantly, you switch it back on. The signal is still there, clearer now."], choices: [{text: "End placeholder", target: "start"}] },
+        };
+
+        // --- DOM Elements ---
+        const narrativeContent = document.getElementById('narrative-content');
+        const choicesContainer = document.getElementById('choices-container');
+        const storyContentWrapper = document.getElementById('story-content-wrapper'); // Wrapper div
+        const bgCanvas = document.getElementById('bgCanvas');
+        const bgCtx = bgCanvas.getContext('2d');
+
+        // --- Game State ---
+        let currentNodeKey = 'start';
+        let isTransitioning = false; // Prevent multiple clicks during transition
+
+        // --- Starfield Background Variables ---
+        let stars = [];
+        const numStars = 150;
+        const twinkleSpeedFactor = 0.0005;
+        const parallaxFactor = 0.05; // How much stars move with mouse
+        let mousePos = { x: window.innerWidth / 2, y: window.innerHeight / 2 }; // Start at center
+
+        // --- Starfield Functions ---
+        function createStars() {
+            stars = [];
+            for (let i = 0; i < numStars; i++) {
+                const speedFactor = Math.random() * 0.5 + 0.1; // Slower stars move less with parallax
+                stars.push({
+                    x: Math.random() * bgCanvas.width,
+                    y: Math.random() * bgCanvas.height,
+                    z: speedFactor, // Use for parallax depth (lower z = slower = further away)
+                    radius: (1 - speedFactor) * 1.5 + 0.3, // Smaller stars appear further
+                    opacity: Math.random() * 0.5 + 0.3,
+                    twinkleSpeed: (Math.random() - 0.5) * 0.04 + 0.01,
+                    baseOpacity: Math.random() * 0.4 + 0.2
+                });
+            }
+        }
+
+        function resizeBackgroundCanvas() {
+            bgCanvas.width = window.innerWidth;
+            bgCanvas.height = window.innerHeight;
+            createStars();
+        }
+
+        function drawBackground(timestamp) {
+            bgCtx.clearRect(0, 0, bgCanvas.width, bgCanvas.height);
+
+            // Calculate mouse offset from center (normalized -1 to 1)
+            const mouseOffsetX = (mousePos.x - bgCanvas.width / 2) / (bgCanvas.width / 2);
+            const mouseOffsetY = (mousePos.y - bgCanvas.height / 2) / (bgCanvas.height / 2);
+
+            stars.forEach(star => {
+                // Twinkle calculation
+                const twinkleValue = Math.sin(timestamp * twinkleSpeedFactor * star.twinkleSpeed + star.x);
+                const opacityModifier = (twinkleValue + 1) / 2 * 0.7 + 0.3;
+                star.opacity = star.baseOpacity * opacityModifier;
+
+                // Parallax calculation
+                // Move star opposite to mouse direction, scaled by its depth (z) and parallaxFactor
+                const parallaxX = star.x - mouseOffsetX * parallaxFactor * (1 / star.z) * 50; // Multiply for visible effect
+                const parallaxY = star.y - mouseOffsetY * parallaxFactor * (1 / star.z) * 50;
+
+                // Draw the star at parallax position
+                bgCtx.beginPath();
+                bgCtx.arc(parallaxX, parallaxY, star.radius, 0, Math.PI * 2);
+                bgCtx.fillStyle = `rgba(255, 255, 255, ${star.opacity})`;
+                bgCtx.fill();
+            });
+        }
+
+        // --- Core Story Functions ---
+
+        function displayNode(nodeKey) {
+            if (isTransitioning) return; // Prevent starting new transition if one is running
+            isTransitioning = true;
+
+            const node = story[nodeKey];
+            if (!node) {
+                console.error(`Story node "${nodeKey}" not found!`);
+                isTransitioning = false;
+                return;
+            }
+
+            // 1. Clone current content to fade out
+            const oldNarrative = narrativeContent.cloneNode(true);
+            const oldChoices = choicesContainer.cloneNode(true);
+            oldNarrative.style.position = 'absolute'; // Position for fade out
+            oldNarrative.style.top = '0';
+            oldNarrative.style.left = '0';
+            oldNarrative.style.width = '100%';
+            oldChoices.style.position = 'absolute';
+            oldChoices.style.bottom = '0'; // Position choices relative to bottom? Or just below narrative?
+            oldChoices.style.left = '0';
+            oldChoices.style.width = '100%';
+            oldChoices.style.marginTop = choicesContainer.style.marginTop; // Keep margin
+            // Add old content temporarily to the wrapper for fade out
+            storyContentWrapper.appendChild(oldNarrative);
+            storyContentWrapper.appendChild(oldChoices);
+
+            // 2. Clear original containers immediately (they are hidden by wrapper)
+            narrativeContent.innerHTML = '';
+            choicesContainer.innerHTML = '';
+            // Set opacity of originals to 0 ready for fade in
+            gsap.set([narrativeContent, choicesContainer], { opacity: 0 });
+
+            // 3. Create GSAP Timeline for coordinated animation
+            const tl = gsap.timeline({
+                onComplete: () => {
+                    // Remove cloned old content after transition
+                    storyContentWrapper.removeChild(oldNarrative);
+                    storyContentWrapper.removeChild(oldChoices);
+                    isTransitioning = false; // Allow next transition
+                }
+            });
+
+            // 4. Animate old content fading out
+            tl.to([oldNarrative.children, oldChoices.children], {
+                opacity: 0,
+                y: -15, // Move up slightly
+                duration: 0.6, // Slightly longer fade
+                stagger: 0.04,
+                ease: "power1.in"
+            }, 0); // Start at beginning of timeline
+
+            // 5. Prepare and animate new content fading in (slightly overlapping)
+            // Add new paragraphs and choices to the original (now empty) containers
+            const newParagraphElements = showParagraphs(node.paragraphs, true); // Pass true to return elements without animating yet
+            const newChoiceElements = showChoices(node.choices, true); // Pass true to return elements without animating yet
+
+            // Animate the containers themselves fading in
+            tl.to([narrativeContent, choicesContainer], {
+                opacity: 1,
+                duration: 0.1 // Quick container fade-in (content animates separately)
+            }, 0.4); // Start slightly before old content fully fades
+
+            // Animate new paragraphs appearing
+            if (newParagraphElements.length > 0) {
+                tl.fromTo(newParagraphElements,
+                    { opacity: 0, y: 15 }, // Start state for new paragraphs
+                    {
+                        opacity: 1,
+                        y: 0,
+                        duration: 0.8,
+                        stagger: 0.5, // Slightly slower stagger
+                        ease: "power2.out"
+                    },
+                    0.5 // Start shortly after old content starts fading
+                );
+            }
+
+            // Animate new choices appearing (after paragraphs)
+            if (newChoiceElements.length > 0) {
+                 // Calculate delay based on new paragraph animation finish time
+                 const paragraphEndTime = 0.5 + (newParagraphElements.length > 0 ? (newParagraphElements.length -1) * 0.5 + 0.8 : 0);
+                 tl.fromTo(newChoiceElements,
+                     { opacity: 0, scale: 0.95 }, // Start state for new choices
+                     {
+                         opacity: 1,
+                         scale: 1,
+                         duration: 0.5,
+                         stagger: 0.15,
+                         ease: "back.out(1.7)"
+                     },
+                     paragraphEndTime // Start after paragraphs finish
+                 );
+            }
+        }
+
+        // Modified to optionally return elements instead of animating immediately
+        function showParagraphs(paragraphs, returnElements = false) {
+            const elements = [];
+            paragraphs.forEach((text) => {
+                const p = document.createElement('p');
+                p.classList.add('narrative-paragraph');
+                p.innerHTML = text;
+                narrativeContent.appendChild(p);
+                elements.push(p);
+            });
+            if (returnElements) {
+                gsap.set(elements, { opacity: 0, y: 15 }); // Set initial state for GSAP
+                return elements;
+            }
+            // Original animation logic (not used in transition)
+            // elements.forEach((p, index) => {
+            //     gsap.to(p, { opacity: 1, y: 0, duration: 0.8, delay: index * 0.6 + 0.5, ease: "power2.out" });
+            // });
+        }
+
+        // Modified to optionally return elements instead of animating immediately
+        function showChoices(choices, returnElements = false) {
+            if (!choices || choices.length === 0) {
+                 if(!returnElements) {
+                     gsap.set(choicesContainer, { opacity: 1, y: 0 }); // Make visible if no choices
+                 }
+                return [];
+            }
+
+            const elements = [];
+            choices.forEach((choice) => {
+                const button = document.createElement('button');
+                button.classList.add('choice-button');
+                button.textContent = choice.text;
+                button.dataset.target = choice.target;
+                button.addEventListener('click', handleChoiceClick);
+                choicesContainer.appendChild(button);
+                elements.push(button);
+            });
+
+            if (returnElements) {
+                 gsap.set(elements, { opacity: 0, scale: 0.95 }); // Set initial state for GSAP
+                 return elements;
+            }
+             // Original animation logic (not used in transition)
+             // const lastParagraphDelay = (story[currentNodeKey].paragraphs.length - 1) * 0.6 + 0.5 + 0.8;
+             // gsap.to(choicesContainer, { opacity: 1, y: 0, duration: 0.5, delay: lastParagraphDelay, ease: "power1.out", onComplete: () => { ... } });
+        }
+
+
+        function handleChoiceClick(event) {
+             if (isTransitioning) return; // Prevent clicks during transition
+            const targetNodeKey = event.target.dataset.target;
+            if (targetNodeKey) {
+                currentNodeKey = targetNodeKey;
+                displayNode(currentNodeKey);
+            } else {
+                console.warn("Choice button clicked with no target node key.");
+            }
+        }
+
+        // --- Mouse Listener for Parallax ---
+        function handleMouseMove(event) {
+             mousePos = { x: event.clientX, y: event.clientY };
+        }
+
+
+        // --- Main Animation Loop ---
+        let animationFrameId = null;
+        function animationLoop(timestamp) {
+            drawBackground(timestamp);
+            animationFrameId = requestAnimationFrame(animationLoop);
+        }
+
+        // --- Initialization ---
+        function init() {
+            resizeBackgroundCanvas();
+            window.addEventListener('resize', resizeBackgroundCanvas);
+            window.addEventListener('mousemove', handleMouseMove); // Add mouse listener
+
+            // Display the starting node without transition animation
+            const startNode = story[currentNodeKey];
+            const pElements = showParagraphs(startNode.paragraphs, true); // Get elements
+            const cElements = showChoices(startNode.choices, true);     // Get elements
+            // Simple fade-in for initial load
+            gsap.set(narrativeContent, { opacity: 1});
+            gsap.set(choicesContainer, { opacity: 1});
+            gsap.to(pElements, { opacity: 1, y: 0, duration: 0.8, stagger: 0.5, ease: "power2.out", delay: 0.2 });
+            gsap.to(cElements, { opacity: 1, scale: 1, duration: 0.5, stagger: 0.15, ease: "back.out(1.7)", delay: (pElements.length * 0.5 + 0.5) });
+
+
+            if (animationFrameId) cancelAnimationFrame(animationFrameId);
+            animationLoop();
+        }
+
+        window.onload = init;
+
+    </script>
+
+</body>
+</html>

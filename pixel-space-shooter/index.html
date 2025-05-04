@@ -1,0 +1,856 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pixel Space Shooter</title>
+    <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            display: flex;
+            flex-direction: column; /* Stack canvas and controls vertically */
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            background-color: #000; /* Black background */
+            color: #fff; /* White text */
+            font-family: 'Press Start 2P', cursive; /* Pixel font */
+            overflow: hidden; /* Prevent scrollbars */
+        }
+
+        #gameCanvas {
+            border: 2px solid #0f0; /* Neon green border */
+            background-color: #111; /* Dark grey canvas background */
+            display: block; /* Remove extra space below canvas */
+            max-width: 100%; /* Ensure canvas fits within screen width */
+            /* Height will be set dynamically by JS to maintain aspect ratio */
+            box-shadow: 0 0 15px #0f0; /* Neon green glow */
+        }
+
+        #gameInfo {
+            display: flex;
+            justify-content: space-between;
+            width: 100%; /* Match canvas width (adjust as needed) */
+            max-width: 600px; /* Max width for info bar */
+            padding: 10px 0;
+            font-size: 14px; /* Smaller font for info */
+            margin-bottom: 15px; /* Space between info and canvas */
+        }
+
+        #score, #lives {
+            color: #0f0; /* Neon green text */
+            text-shadow: 0 0 5px #0f0;
+        }
+
+        /* Touch Controls Styling */
+        #touchControls {
+            display: none; /* Hidden by default, shown via JS on touch devices */
+            width: 100%;
+            max-width: 300px; /* Adjust size as needed */
+            margin-top: 20px; /* Space above controls */
+            user-select: none; /* Prevent text selection */
+            -webkit-user-select: none; /* Safari */
+            -moz-user-select: none; /* Firefox */
+            -ms-user-select: none; /* IE/Edge */
+        }
+
+        .touch-row {
+            display: flex;
+            justify-content: space-around;
+            margin-bottom: 10px;
+        }
+
+        .touch-button {
+            background-color: #333;
+            border: 2px solid #0f0;
+            color: #0f0;
+            padding: 15px 20px;
+            font-family: 'Press Start 2P', cursive;
+            font-size: 16px;
+            cursor: pointer;
+            border-radius: 5px; /* Slightly rounded corners */
+            box-shadow: 0 0 8px #0f0 inset, 0 0 5px #0f0;
+            transition: background-color 0.1s ease, box-shadow 0.1s ease;
+            text-align: center;
+            min-width: 60px; /* Ensure minimum button size */
+        }
+
+        .touch-button:active {
+            background-color: #555;
+            box-shadow: 0 0 12px #0f0 inset, 0 0 8px #0f0;
+        }
+
+        /* Message Box Styling */
+        #messageBox {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background-color: rgba(0, 0, 0, 0.8);
+            color: #0f0;
+            padding: 30px;
+            border: 2px solid #0f0;
+            box-shadow: 0 0 15px #0f0;
+            text-align: center;
+            font-size: 18px;
+            display: none; /* Hidden by default */
+            z-index: 10;
+            line-height: 1.6;
+        }
+         #messageBox button {
+             font-family: 'Press Start 2P', cursive;
+             font-size: 14px;
+             padding: 10px 15px;
+             background-color: #222;
+             color: #0f0;
+             border: 1px solid #0f0;
+             margin-top: 20px;
+             cursor: pointer;
+             box-shadow: 0 0 5px #0f0;
+             transition: background-color 0.1s ease;
+         }
+          #messageBox button:hover {
+              background-color: #444;
+          }
+
+    </style>
+</head>
+<body>
+
+    <div id="gameInfo">
+        <span id="score">Score: 0</span>
+        <span id="lives">Lives: 3</span>
+    </div>
+
+    <canvas id="gameCanvas"></canvas>
+
+    <div id="touchControls">
+        <div class="touch-row">
+            <button class="touch-button" id="touchUp">▲</button>
+        </div>
+        <div class="touch-row">
+            <button class="touch-button" id="touchLeft">◀</button>
+            <button class="touch-button" id="touchFire">🔥</button> <button class="touch-button" id="touchRight">▶</button>
+        </div>
+         <div class="touch-row">
+            <button class="touch-button" id="touchDown">▼</button>
+        </div>
+    </div>
+
+     <div id="messageBox">
+        <p id="messageText"></p>
+        <button id="messageButton"></button>
+    </div>
+
+    <script>
+        // --- Game Setup ---
+        const canvas = document.getElementById('gameCanvas');
+        const ctx = canvas.getContext('2d');
+        const scoreEl = document.getElementById('score');
+        const livesEl = document.getElementById('lives');
+        const messageBox = document.getElementById('messageBox');
+        const messageText = document.getElementById('messageText');
+        const messageButton = document.getElementById('messageButton');
+        const touchControls = document.getElementById('touchControls');
+
+        // Game variables
+        let score = 0;
+        let lives = 3;
+        let gameRunning = false;
+        let gameOver = false;
+        let animationFrameId;
+        let keys = {}; // Object to track pressed keys
+        let touchActive = { up: false, down: false, left: false, right: false, fire: false };
+
+        // Game Objects
+        let player;
+        let projectiles = [];
+        let enemies = [];
+        let explosions = [];
+        let stars = []; // For background starfield
+
+        // Timing variables
+        let lastEnemySpawnTime = 0;
+        const enemySpawnInterval = 1500; // Milliseconds between enemy spawns (adjust for difficulty)
+        let lastFireTime = 0;
+        const fireCooldown = 250; // Milliseconds between player shots
+
+        // --- Audio Setup (Basic Web Audio API) ---
+        let audioCtx;
+        let shootSoundBuffer, explosionSoundBuffer, playerHitSoundBuffer, gameOverSoundBuffer;
+
+        function initAudio() {
+            try {
+                audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+                // Create basic oscillator sounds (replace with loaded samples for better quality)
+                // Note: Creating sounds programmatically avoids needing external files
+                // Shoot Sound (Short high pitch)
+                shootSoundBuffer = createSound(0.05, 'square', 880, 440);
+                // Explosion Sound (Short noise burst)
+                explosionSoundBuffer = createNoiseSound(0.2);
+                 // Player Hit Sound (Descending pitch)
+                playerHitSoundBuffer = createSound(0.15, 'sawtooth', 440, 220);
+                 // Game Over Sound (Simple descending notes)
+                gameOverSoundBuffer = createSequenceSound([
+                    { freq: 330, duration: 0.15, delay: 0 },    // E4
+                    { freq: 294, duration: 0.15, delay: 0.15 }, // D4
+                    { freq: 261, duration: 0.2, delay: 0.3 }    // C4
+                ]);
+
+            } catch (e) {
+                console.warn("Web Audio API is not supported in this browser.");
+                audioCtx = null; // Disable audio if not supported
+            }
+        }
+
+        // Function to create a simple tone
+        function createSound(duration, type, startFreq, endFreq) {
+            if (!audioCtx) return null;
+            const buffer = audioCtx.createBuffer(1, audioCtx.sampleRate * duration, audioCtx.sampleRate);
+            const data = buffer.getChannelData(0);
+            const attack = 0.01; // Short attack/decay
+            const decay = duration - attack;
+
+            for (let i = 0; i < data.length; i++) {
+                const t = i / audioCtx.sampleRate;
+                const envelope = t < attack ? t / attack : 1 - (t - attack) / decay;
+                const freq = startFreq + (endFreq - startFreq) * (t / duration);
+                if (type === 'square') {
+                    data[i] = Math.sign(Math.sin(2 * Math.PI * freq * t)) * envelope * 0.3; // Square wave
+                } else if (type === 'sawtooth') {
+                     data[i] = (2 * (t * freq - Math.floor(0.5 + t * freq))) * envelope * 0.3; // Sawtooth
+                } else { // Sine default
+                    data[i] = Math.sin(2 * Math.PI * freq * t) * envelope * 0.3; // Sine wave
+                }
+                 // Basic fade out
+                if (t > duration - 0.01) {
+                     data[i] *= (duration - t) / 0.01;
+                }
+            }
+            return buffer;
+        }
+
+         // Function to create white noise
+        function createNoiseSound(duration) {
+             if (!audioCtx) return null;
+             const buffer = audioCtx.createBuffer(1, audioCtx.sampleRate * duration, audioCtx.sampleRate);
+             const data = buffer.getChannelData(0);
+             for (let i = 0; i < data.length; i++) {
+                 data[i] = (Math.random() * 2 - 1) * 0.2; // White noise
+                 // Fade out
+                 if (i > data.length * 0.8) {
+                     data[i] *= (data.length - i) / (data.length * 0.2);
+                 }
+             }
+             return buffer;
+         }
+
+        // Function to play sequenced notes
+        function createSequenceSound(notes) {
+            if (!audioCtx) return null;
+             let totalDuration = 0;
+             notes.forEach(note => {
+                 totalDuration = Math.max(totalDuration, note.delay + note.duration);
+             });
+
+            const buffer = audioCtx.createBuffer(1, audioCtx.sampleRate * totalDuration, audioCtx.sampleRate);
+            const data = buffer.getChannelData(0);
+
+            notes.forEach(note => {
+                const startSample = Math.floor(note.delay * audioCtx.sampleRate);
+                const endSample = startSample + Math.floor(note.duration * audioCtx.sampleRate);
+                for (let i = startSample; i < endSample && i < data.length; i++) {
+                    const t = (i - startSample) / audioCtx.sampleRate;
+                    // Simple sine wave for each note
+                    data[i] += Math.sin(2 * Math.PI * note.freq * t) * 0.2;
+                     // Fade out last bit of note
+                    if (i > endSample - audioCtx.sampleRate * 0.01) {
+                         data[i] *= (endSample - i) / (audioCtx.sampleRate * 0.01);
+                    }
+                }
+            });
+            return buffer;
+        }
+
+
+        // Function to play a sound buffer
+        function playSound(buffer) {
+            if (!audioCtx || !buffer || !gameRunning) return; // Don't play if muted or game not running
+            const source = audioCtx.createBufferSource();
+            source.buffer = buffer;
+            source.connect(audioCtx.destination);
+            source.start(0);
+        }
+
+
+        // --- Game Object Classes ---
+
+        // Player Class
+        class Player {
+            constructor(x, y, width, height, speed) {
+                this.x = x;
+                this.y = y;
+                this.width = width;
+                this.height = height;
+                this.speed = speed;
+                this.color = '#0f0'; // Neon green player
+                this.invulnerable = false;
+                this.invulnerabilityDuration = 1500; // 1.5 seconds
+                this.invulnerabilityTimer = 0;
+                this.blink = false;
+            }
+
+            draw() {
+                 // Blinking effect when invulnerable
+                if (this.invulnerable) {
+                    this.blink = !this.blink;
+                    if (this.blink) return; // Skip drawing every other frame
+                }
+                ctx.fillStyle = this.color;
+                // Simple triangle shape for player ship
+                ctx.beginPath();
+                ctx.moveTo(this.x + this.width / 2, this.y);
+                ctx.lineTo(this.x, this.y + this.height);
+                ctx.lineTo(this.x + this.width, this.y + this.height);
+                ctx.closePath();
+                ctx.fill();
+
+                 // Simple "engine" flame
+                 ctx.fillStyle = '#ffcc00'; // Yellow/orange
+                 ctx.fillRect(this.x + this.width / 2 - 3, this.y + this.height, 6, 8);
+            }
+
+            update(deltaTime) {
+                // Movement based on keys or touch controls
+                if (keys['ArrowLeft'] || keys['a'] || touchActive.left) {
+                    this.x -= this.speed * deltaTime;
+                }
+                if (keys['ArrowRight'] || keys['d'] || touchActive.right) {
+                    this.x += this.speed * deltaTime;
+                }
+                 if (keys['ArrowUp'] || keys['w'] || touchActive.up) {
+                    this.y -= this.speed * deltaTime;
+                }
+                if (keys['ArrowDown'] || keys['s'] || touchActive.down) {
+                    this.y += this.speed * deltaTime;
+                }
+
+                // Keep player within canvas bounds
+                if (this.x < 0) this.x = 0;
+                if (this.x + this.width > canvas.width) this.x = canvas.width - this.width;
+                 if (this.y < 0) this.y = 0;
+                 if (this.y + this.height > canvas.height) this.y = canvas.height - this.height;
+
+                 // Invulnerability timer
+                 if (this.invulnerable) {
+                     this.invulnerabilityTimer -= deltaTime * 1000; // Convert deltaTime to ms
+                     if (this.invulnerabilityTimer <= 0) {
+                         this.invulnerable = false;
+                         this.blink = false; // Ensure player is visible when timer ends
+                     }
+                 }
+            }
+
+            shoot() {
+                const now = performance.now();
+                if (now - lastFireTime > fireCooldown) {
+                    // Create a projectile slightly above the player center
+                    projectiles.push(new Projectile(this.x + this.width / 2 - 2, this.y, 4, 10, 400, '#0ff')); // Cyan laser
+                    playSound(shootSoundBuffer);
+                    lastFireTime = now;
+                }
+            }
+
+             hit() {
+                 if (!this.invulnerable) {
+                     lives--;
+                     updateUI();
+                     playSound(playerHitSoundBuffer);
+                     explosions.push(new Explosion(this.x + this.width / 2, this.y + this.height / 2, 30)); // Explosion at player center
+                     if (lives <= 0) {
+                         triggerGameOver();
+                     } else {
+                         // Become invulnerable
+                         this.invulnerable = true;
+                         this.invulnerabilityTimer = this.invulnerabilityDuration;
+                         // Reset position (optional)
+                         // this.x = canvas.width / 2 - this.width / 2;
+                         // this.y = canvas.height - this.height - 30;
+                     }
+                 }
+             }
+        }
+
+        // Projectile Class
+        class Projectile {
+            constructor(x, y, width, height, speed, color) {
+                this.x = x;
+                this.y = y;
+                this.width = width;
+                this.height = height;
+                this.speed = speed;
+                this.color = color;
+            }
+
+            draw() {
+                ctx.fillStyle = this.color;
+                ctx.fillRect(this.x, this.y, this.width, this.height);
+            }
+
+            update(deltaTime) {
+                this.y -= this.speed * deltaTime; // Move upwards
+            }
+        }
+
+        // Enemy Class
+        class Enemy {
+            constructor(x, y, width, height, speed, type) {
+                this.x = x;
+                this.y = y;
+                this.width = width;
+                this.height = height;
+                this.speed = speed;
+                this.type = type; // e.g., 'basic', 'zigzag'
+                this.color = '#f00'; // Red enemies
+                this.zigzagDirection = 1; // 1 for right, -1 for left
+                this.zigzagTimer = 0;
+                this.zigzagInterval = 0.5; // Change direction every 0.5 seconds
+            }
+
+            draw() {
+                ctx.fillStyle = this.color;
+                 // Simple square enemy for now
+                 ctx.fillRect(this.x, this.y, this.width, this.height);
+                // // Different shape based on type (Example)
+                // if (this.type === 'zigzag') {
+                //      ctx.fillStyle = '#ff0'; // Yellow for zigzag
+                //      ctx.fillRect(this.x, this.y, this.width, this.height);
+                // } else {
+                //      ctx.fillStyle = '#f00'; // Red for basic
+                //      ctx.beginPath();
+                //      ctx.arc(this.x + this.width / 2, this.y + this.height / 2, this.width / 2, 0, Math.PI * 2);
+                //      ctx.fill();
+                // }
+            }
+
+            update(deltaTime) {
+                this.y += this.speed * deltaTime; // Move downwards
+
+                if (this.type === 'zigzag') {
+                     this.x += this.speed * this.zigzagDirection * deltaTime * 0.7; // Horizontal movement
+                     this.zigzagTimer += deltaTime;
+                     if (this.zigzagTimer >= this.zigzagInterval) {
+                         this.zigzagDirection *= -1; // Reverse direction
+                         this.zigzagTimer = 0;
+                     }
+                     // Keep within bounds horizontally
+                     if (this.x < 0 || this.x + this.width > canvas.width) {
+                         this.zigzagDirection *= -1;
+                         this.x = Math.max(0, Math.min(this.x, canvas.width - this.width)); // Clamp position
+                     }
+                }
+            }
+        }
+
+        // Explosion Class
+        class Explosion {
+            constructor(x, y, radius) {
+                this.x = x;
+                this.y = y;
+                this.maxRadius = radius;
+                this.currentRadius = 0;
+                this.speed = 200; // How fast the explosion expands
+                this.color = `rgba(255, ${Math.random() * 155 + 100}, 0, 1)`; // Orange/Yellow/Red
+                this.duration = 0.3; // Seconds
+                this.life = this.duration;
+            }
+
+            draw() {
+                const alpha = this.life / this.duration; // Fade out
+                ctx.beginPath();
+                ctx.arc(this.x, this.y, this.currentRadius, 0, Math.PI * 2);
+                ctx.fillStyle = this.color.replace(/, 1\)/, `, ${alpha})`); // Update alpha
+                ctx.fill();
+            }
+
+            update(deltaTime) {
+                this.currentRadius += this.speed * deltaTime;
+                this.life -= deltaTime;
+            }
+        }
+
+         // Star Class (for background)
+        class Star {
+            constructor() {
+                this.x = Math.random() * canvas.width;
+                this.y = Math.random() * canvas.height;
+                this.size = Math.random() * 1.5 + 0.5; // Small stars
+                this.speed = Math.random() * 20 + 10; // Varying speeds for parallax
+                this.color = `rgba(255, 255, 255, ${Math.random() * 0.5 + 0.3})`; // Faint white
+            }
+
+            draw() {
+                ctx.fillStyle = this.color;
+                ctx.beginPath();
+                ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+                ctx.fill();
+            }
+
+            update(deltaTime) {
+                this.y += this.speed * deltaTime;
+                // Reset star to top if it goes off screen
+                if (this.y > canvas.height) {
+                    this.y = 0 - this.size;
+                    this.x = Math.random() * canvas.width;
+                }
+            }
+        }
+
+
+        // --- Game Logic ---
+
+        function spawnEnemy() {
+            const type = Math.random() < 0.3 ? 'zigzag' : 'basic'; // 30% chance of zigzag
+            const width = 30;
+            const height = 30;
+            const x = Math.random() * (canvas.width - width); // Random horizontal position
+            const y = -height; // Start just above the canvas
+             const speed = 100 + Math.random() * 100 + (score / 100); // Increase speed slightly with score
+
+            enemies.push(new Enemy(x, y, width, height, speed, type));
+        }
+
+        function checkCollisions() {
+            // Projectiles hitting enemies
+            for (let i = projectiles.length - 1; i >= 0; i--) {
+                const p = projectiles[i];
+                for (let j = enemies.length - 1; j >= 0; j--) {
+                    const e = enemies[j];
+
+                    // Simple AABB collision detection
+                    if (p.x < e.x + e.width &&
+                        p.x + p.width > e.x &&
+                        p.y < e.y + e.height &&
+                        p.y + p.height > e.y) {
+
+                        // Collision detected
+                        score += 10; // Increase score
+                        updateUI();
+                        playSound(explosionSoundBuffer);
+                        explosions.push(new Explosion(e.x + e.width / 2, e.y + e.height / 2, e.width)); // Explosion at enemy center
+
+                        projectiles.splice(i, 1); // Remove projectile
+                        enemies.splice(j, 1); // Remove enemy
+                        break; // Stop checking this projectile against other enemies
+                    }
+                }
+            }
+
+             // Enemies hitting player
+             if (!player.invulnerable) {
+                 for (let i = enemies.length - 1; i >= 0; i--) {
+                     const e = enemies[i];
+                     if (player.x < e.x + e.width &&
+                         player.x + player.width > e.x &&
+                         player.y < e.y + e.height &&
+                         player.y + player.height > e.y) {
+
+                         enemies.splice(i, 1); // Remove enemy that hit player
+                         player.hit(); // Player takes damage
+                         break; // Only process one collision per frame
+                     }
+                 }
+             }
+        }
+
+        function updateUI() {
+            scoreEl.textContent = `Score: ${score}`;
+            livesEl.textContent = `Lives: ${lives}`;
+        }
+
+        function showMessage(text, buttonText, callback) {
+             messageText.textContent = text;
+             messageButton.textContent = buttonText;
+             messageButton.onclick = callback; // Assign the callback directly
+             messageBox.style.display = 'block';
+         }
+
+        function hideMessage() {
+            messageBox.style.display = 'none';
+        }
+
+         function triggerGameOver() {
+             gameRunning = false;
+             gameOver = true;
+             playSound(gameOverSoundBuffer);
+             showMessage(`Game Over!\nFinal Score: ${score}`, "Play Again?", startGame);
+             // Don't cancel animation frame here, let it show the game over message
+         }
+
+        function resetGame() {
+            score = 0;
+            lives = 3;
+            player.x = canvas.width / 2 - player.width / 2;
+            player.y = canvas.height - player.height - 30;
+            player.invulnerable = false; // Ensure player is not invulnerable at start
+            projectiles = [];
+            enemies = [];
+            explosions = [];
+            lastEnemySpawnTime = 0;
+            lastFireTime = 0;
+            gameOver = false;
+            updateUI();
+            hideMessage();
+        }
+
+         function startGame() {
+             if (!audioCtx) initAudio(); // Initialize audio context on first interaction
+             if (audioCtx && audioCtx.state === 'suspended') {
+                 audioCtx.resume(); // Resume audio context if suspended
+             }
+             resetGame();
+             gameRunning = true;
+             gameOver = false; // Explicitly set game over to false
+             hideMessage();
+             // Restart the game loop if it was stopped
+             if (!animationFrameId || gameOver) {
+                 let lastTime = 0;
+                 function gameLoop(timestamp) {
+                     if (!gameRunning && !gameOver) { // Stop loop if game explicitly stopped but not game over
+                         cancelAnimationFrame(animationFrameId);
+                         animationFrameId = null;
+                         return;
+                     }
+                      if (gameOver) { // Keep rendering slightly for game over screen, but don't update logic
+                          draw(); // Draw final state
+                          animationFrameId = requestAnimationFrame(gameLoop); // Keep loop for message box
+                          return;
+                      }
+
+                     const deltaTime = (timestamp - lastTime) / 1000; // Time elapsed in seconds
+                     lastTime = timestamp;
+
+                     update(deltaTime, timestamp);
+                     draw();
+
+                     animationFrameId = requestAnimationFrame(gameLoop);
+                 }
+                 animationFrameId = requestAnimationFrame(gameLoop);
+             }
+         }
+
+
+        // --- Main Update and Draw Functions ---
+
+        function update(deltaTime, timestamp) {
+            if (!gameRunning) return;
+
+            // Update player
+            player.update(deltaTime);
+
+            // Player shooting
+            if (keys[' '] || touchActive.fire) { // Spacebar or touch fire
+                player.shoot();
+            }
+
+            // Update projectiles
+            for (let i = projectiles.length - 1; i >= 0; i--) {
+                projectiles[i].update(deltaTime);
+                // Remove projectiles that go off-screen
+                if (projectiles[i].y < 0) {
+                    projectiles.splice(i, 1);
+                }
+            }
+
+            // Update enemies
+            for (let i = enemies.length - 1; i >= 0; i--) {
+                enemies[i].update(deltaTime);
+                // Remove enemies that go off-screen
+                if (enemies[i].y > canvas.height) {
+                    enemies.splice(i, 1);
+                }
+            }
+
+            // Update explosions
+            for (let i = explosions.length - 1; i >= 0; i--) {
+                explosions[i].update(deltaTime);
+                if (explosions[i].life <= 0) {
+                    explosions.splice(i, 1);
+                }
+            }
+
+             // Update stars
+             stars.forEach(star => star.update(deltaTime));
+
+            // Spawn enemies periodically
+            if (timestamp - lastEnemySpawnTime > enemySpawnInterval) {
+                spawnEnemy();
+                lastEnemySpawnTime = timestamp;
+            }
+
+            // Check for collisions
+            checkCollisions();
+        }
+
+        function draw() {
+            // Clear canvas (draw background)
+            ctx.fillStyle = '#000'; // Black background inside canvas
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+             // Draw stars
+             stars.forEach(star => star.draw());
+
+            // Draw player
+            player.draw();
+
+            // Draw projectiles
+            projectiles.forEach(p => p.draw());
+
+            // Draw enemies
+            enemies.forEach(e => e.draw());
+
+            // Draw explosions
+            explosions.forEach(ex => ex.draw());
+
+             // UI updates are handled separately by updateUI()
+        }
+
+        // --- Input Handling ---
+        function handleKeyDown(e) {
+            keys[e.key] = true;
+             // Start game on Enter if not already running
+             if ((e.key === 'Enter' || e.key === ' ') && !gameRunning && !gameOver) {
+                 startGame();
+             }
+             // Prevent default browser behavior for space and arrow keys
+             if ([' ', 'ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight'].includes(e.key)) {
+                 e.preventDefault();
+             }
+        }
+
+        function handleKeyUp(e) {
+            keys[e.key] = false;
+        }
+
+        // --- Touch Input Handling ---
+        function setupTouchControls() {
+            // Check if touch is supported
+            const isTouchDevice = ('ontouchstart' in window) || (navigator.maxTouchPoints > 0);
+             if (isTouchDevice) {
+                 touchControls.style.display = 'block'; // Show controls
+
+                 // Helper to handle touch start/end
+                 const handleTouch = (elementId, key) => {
+                     const button = document.getElementById(elementId);
+                     button.addEventListener('touchstart', (e) => {
+                         e.preventDefault(); // Prevent scrolling/zooming
+                         touchActive[key] = true;
+                         button.style.backgroundColor = '#555'; // Active state
+                     }, { passive: false }); // Need passive: false to call preventDefault
+
+                     button.addEventListener('touchend', (e) => {
+                         e.preventDefault();
+                         touchActive[key] = false;
+                          button.style.backgroundColor = '#333'; // Normal state
+                     });
+                      button.addEventListener('touchcancel', (e) => { // Handle cancellation
+                         touchActive[key] = false;
+                          button.style.backgroundColor = '#333';
+                     });
+                 };
+
+                 handleTouch('touchUp', 'up');
+                 handleTouch('touchDown', 'down');
+                 handleTouch('touchLeft', 'left');
+                 handleTouch('touchRight', 'right');
+                 handleTouch('touchFire', 'fire');
+
+                 // Start game on first touch interaction if needed
+                 const startOnTouch = () => {
+                     if (!gameRunning && !gameOver) {
+                         startGame();
+                     }
+                     // Remove this listener after first touch to avoid multiple starts
+                     document.body.removeEventListener('touchstart', startOnTouch);
+                 };
+                 document.body.addEventListener('touchstart', startOnTouch, { once: true });
+
+             } else {
+                 touchControls.style.display = 'none'; // Hide if not touch device
+             }
+        }
+
+
+        // --- Initialization ---
+        function resizeCanvas() {
+            // Maintain an aspect ratio (e.g., 3:4)
+            const aspectRatio = 3 / 4;
+            const maxWidth = 600; // Max width for the game
+            const maxHeight = 800; // Max height based on aspect ratio
+
+            let newWidth = window.innerWidth * 0.9; // Use 90% of window width
+            let newHeight = window.innerHeight * 0.7; // Use 70% of window height for game area
+
+             // Adjust based on aspect ratio
+             if (newWidth / newHeight > aspectRatio) {
+                 // Width is the limiting factor
+                 newWidth = newHeight * aspectRatio;
+             } else {
+                 // Height is the limiting factor
+                 newHeight = newWidth / aspectRatio;
+             }
+
+             // Apply max dimensions
+             newWidth = Math.min(newWidth, maxWidth);
+             newHeight = Math.min(newHeight, maxHeight);
+
+
+            canvas.width = Math.floor(newWidth);
+            canvas.height = Math.floor(newHeight);
+
+            // Center the game info bar relative to the canvas width
+            const gameInfo = document.getElementById('gameInfo');
+            gameInfo.style.width = `${canvas.width}px`;
+
+            // Re-initialize stars if canvas size changes significantly
+            if (stars.length === 0 || Math.abs(stars[0].x - canvas.width) > 10) { // Simple check
+                createStars(100); // Recreate stars for new size
+            }
+
+             // Re-center player if game is running
+             if (player) {
+                 player.x = Math.max(0, Math.min(player.x, canvas.width - player.width));
+                 player.y = Math.max(0, Math.min(player.y, canvas.height - player.height));
+             }
+        }
+
+         function createStars(count) {
+             stars = []; // Clear existing stars
+             for (let i = 0; i < count; i++) {
+                 stars.push(new Star());
+             }
+         }
+
+        // Initial setup on window load
+        window.addEventListener('load', () => {
+            resizeCanvas(); // Set initial size
+            player = new Player(canvas.width / 2 - 15, canvas.height - 60, 30, 30, 250); // Create player
+            createStars(100); // Create background stars
+            updateUI();
+            setupTouchControls(); // Setup touch if applicable
+
+            // Show initial start message
+            showMessage("Pixel Space Shooter\n\nUse Arrow Keys/WASD to Move\nSpacebar to Shoot", "Start Game", startGame);
+
+            // Add event listeners
+            window.addEventListener('keydown', handleKeyDown);
+            window.addEventListener('keyup', handleKeyUp);
+            window.addEventListener('resize', resizeCanvas); // Adjust canvas on resize
+        });
+
+    </script>
+
+</body>
+</html>

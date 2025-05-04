@@ -1,0 +1,724 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>INFINITYone - The Artisan's Digital Atelier</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;700&family=Lato:wght@300;400;700&family=Playfair+Display:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        /* Base styles */
+        body {
+            font-family: theme('fontFamily.sans');
+            color: theme('colors.brand-charcoal');
+            background-color: theme('colors.brand-offwhite');
+            overflow-x: hidden; /* Prevent horizontal scroll */
+        }
+
+        h1, h2, h3, h4, h5, h6 {
+            font-family: theme('fontFamily.serif');
+        }
+
+        /* Navigation link color override */
+        header nav a, #mobile-menu nav a {
+            color: #000000 !important; /* Use !important to override Tailwind class */
+        }
+
+        /* Custom underline animation for links */
+        .link-underline {
+            position: relative;
+            display: inline-block;
+            padding-bottom: 2px; /* Space for underline */
+        }
+        .link-underline::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 0;
+            height: 1px;
+            background-color: theme('colors.brand-gold');
+            transition: width 0.3s theme('transitionTimingFunction.smooth');
+        }
+        .link-underline:hover::after {
+            width: 100%;
+        }
+
+        /* Style for elements animated on scroll */
+        .scroll-animate {
+            opacity: 0;
+            transition: opacity 0.7s ease-out, transform 0.7s ease-out;
+        }
+        .scroll-animate.fade-in {
+             opacity: 0;
+             transform: translateY(20px); /* Start slightly lower */
+        }
+        .scroll-animate.slide-in-left {
+             opacity: 0;
+             transform: translateX(-30px); /* Start further left */
+        }
+        .scroll-animate.slide-in-right {
+             opacity: 0;
+             transform: translateX(30px); /* Start further right */
+        }
+        .scroll-animate.visible {
+            opacity: 1;
+            transform: translate(0, 0); /* End at original position */
+        }
+
+        /* Sticky Header - Adjust top value if needed */
+        #main-header.sticky {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 50;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            animation: slideDown 0.5s ease-out;
+        }
+        @keyframes slideDown {
+            from { transform: translateY(-100%); }
+            to { transform: translateY(0); }
+        }
+
+        /* Mobile Menu Styling */
+        #mobile-menu {
+            transition: transform 0.3s ease-in-out;
+        }
+        #mobile-menu.hidden {
+            transform: translateX(100%);
+        }
+
+        /* Modal Styling */
+        .modal {
+            display: none; /* Hidden by default */
+            position: fixed;
+            z-index: 100;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            overflow: auto;
+            background-color: rgba(0,0,0,0.8); /* Dim background */
+            align-items: center;
+            justify-content: center;
+        }
+        .modal.flex { display: flex; } /* Use flex to show */
+        .modal-content {
+            margin: auto;
+            display: block;
+            max-width: 80%;
+            max-height: 80%;
+            animation: zoomIn 0.3s ease-out;
+        }
+        .modal-caption {
+            margin: 15px auto;
+            display: block;
+            width: 80%;
+            max-width: 700px;
+            text-align: center;
+            color: #ccc;
+            padding: 10px 0;
+            font-family: theme('fontFamily.sans');
+        }
+        .modal-close {
+            position: absolute;
+            top: 20px;
+            right: 35px;
+            color: #f1f1f1;
+            font-size: 40px;
+            font-weight: bold;
+            transition: 0.3s;
+            cursor: pointer;
+        }
+        .modal-close:hover,
+        .modal-close:focus {
+            color: #bbb;
+            text-decoration: none;
+        }
+        @keyframes zoomIn {
+            from { transform: scale(0.8); opacity: 0; }
+            to { transform: scale(1); opacity: 1; }
+        }
+
+        /* Process Section Styling */
+        .process-step {
+            position: relative;
+            padding-left: 40px; /* Space for line and icon */
+            margin-bottom: 40px;
+            padding-bottom: 40px;
+            border-left: 2px solid theme('colors.brand-gold');
+        }
+        .process-step:last-child {
+            border-left: none;
+            padding-bottom: 0;
+            margin-bottom: 0;
+        }
+        .process-step::before { /* Dot on the timeline */
+            content: '';
+            position: absolute;
+            left: -9px; /* Center the dot on the line */
+            top: 0;
+            width: 16px;
+            height: 16px;
+            background-color: theme('colors.brand-gold');
+            border-radius: 50%;
+            border: 3px solid theme('colors.brand-offwhite'); /* Match background */
+        }
+
+        /* Simple Parallax for Hero Background */
+        .parallax-bg {
+            background-attachment: fixed; /* Creates the parallax effect */
+            background-position: center;
+            background-repeat: no-repeat;
+            background-size: cover;
+        }
+        /* Fallback for mobile where fixed background can be jumpy */
+        @media (max-width: 768px) {
+            .parallax-bg {
+                background-attachment: scroll;
+            }
+        }
+
+        /* Form focus styling */
+        input:focus, textarea:focus {
+            outline: none;
+            border-color: theme('colors.brand-gold');
+            box-shadow: 0 0 0 2px theme('colors.brand-gold' / 30%);
+        }
+
+        /* Message Box Styling */
+        #form-message {
+            display: none; /* Hidden by default */
+            padding: 1rem;
+            margin-top: 1rem;
+            border-radius: 0.5rem;
+            text-align: center;
+            font-weight: bold;
+        }
+        #form-message.success {
+            background-color: theme('colors.green-100');
+            color: theme('colors.green-800');
+            border: 1px solid theme('colors.green-300');
+            display: block; /* Show on success */
+        }
+        #form-message.error {
+            background-color: theme('colors.red-100');
+            color: theme('colors.red-800');
+            border: 1px solid theme('colors.red-300');
+            display: block; /* Show on error */
+        }
+
+    </style>
+    <script>
+        // Define custom fonts and colors for Tailwind
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        serif: ['Playfair Display', 'Cormorant Garamond', 'serif'],
+                        sans: ['Lato', 'Inter', 'sans-serif'],
+                    },
+                    colors: {
+                        'brand-offwhite': '#F8F8F8',
+                        'brand-lightgrey': '#EAEAEA',
+                        'brand-charcoal': '#333333',
+                        'brand-gold': '#B08D57', // Primary Accent
+                        'brand-bronze': '#8C7853', // Alternative Primary
+                        'brand-forest': '#228B22', // Secondary Accent Example (Woodworker)
+                        'brand-indigo': '#4B0082', // Secondary Accent Example (Textile)
+                    },
+                    transitionTimingFunction: {
+                        'smooth': 'cubic-bezier(0.4, 0, 0.2, 1)',
+                    },
+                    keyframes: {
+                        fadeIn: {
+                            '0%': { opacity: '0' },
+                            '100%': { opacity: '1' },
+                        },
+                        slideInUp: {
+                            '0%': { opacity: '0', transform: 'translateY(20px)' },
+                            '100%': { opacity: '1', transform: 'translateY(0)' },
+                        },
+                        slideInLeft: {
+                            '0%': { opacity: '0', transform: 'translateX(-20px)' },
+                            '100%': { opacity: '1', transform: 'translateX(0)' },
+                        },
+                         underlineGrow: {
+                            '0%': { width: '0%' },
+                            '100%': { width: '100%' },
+                        }
+                    },
+                    animation: {
+                        fadeIn: 'fadeIn 1s ease-out forwards',
+                        slideInUp: 'slideInUp 0.7s ease-out forwards',
+                        slideInLeft: 'slideInLeft 0.7s ease-out forwards',
+                        underlineGrow: 'underlineGrow 0.3s ease-out forwards',
+                    }
+                }
+            }
+        }
+    </script>
+</head>
+<body class="bg-brand-offwhite text-brand-charcoal antialiased">
+
+    <header id="main-header" class="bg-brand-offwhite/95 backdrop-blur-sm w-full transition-all duration-300 ease-smooth py-4">
+        <div class="container mx-auto px-6 flex justify-between items-center">
+            <a href="#hero" class="text-2xl font-serif font-bold text-brand-charcoal hover:text-brand-gold transition duration-300">
+                Artisan's Atelier
+            </a>
+
+            <nav class="hidden md:flex space-x-8">
+                <a href="#about" class="link-underline text-brand-charcoal hover:text-brand-gold transition duration-300">About</a>
+                <a href="#portfolio" class="link-underline text-brand-charcoal hover:text-brand-gold transition duration-300">Portfolio</a>
+                <a href="#process" class="link-underline text-brand-charcoal hover:text-brand-gold transition duration-300">Process</a>
+                <a href="#contact" class="link-underline text-brand-charcoal hover:text-brand-gold transition duration-300">Contact</a>
+            </nav>
+
+            <button id="mobile-menu-button" class="md:hidden text-brand-charcoal focus:outline-none">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16m-7 6h7"></path></svg>
+            </button>
+        </div>
+    </header>
+
+    <div id="mobile-menu" class="fixed top-0 right-0 h-full w-64 bg-brand-charcoal text-brand-offwhite p-8 transform translate-x-full transition-transform duration-300 ease-smooth z-40 md:hidden">
+        <button id="close-mobile-menu" class="absolute top-4 right-4 text-brand-offwhite">
+            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+        </button>
+        <nav class="flex flex-col space-y-6 mt-12">
+            <a href="#about" class="hover:text-brand-gold transition duration-300 mobile-nav-link">About</a>
+            <a href="#portfolio" class="hover:text-brand-gold transition duration-300 mobile-nav-link">Portfolio</a>
+            <a href="#process" class="hover:text-brand-gold transition duration-300 mobile-nav-link">Process</a>
+            <a href="#contact" class="hover:text-brand-gold transition duration-300 mobile-nav-link">Contact</a>
+        </nav>
+    </div>
+
+    <main>
+
+        <section id="hero" class="h-screen min-h-[600px] flex items-center justify-center text-center bg-brand-lightgrey parallax-bg" style="background-image: url('hero-background.jpg');">
+             <div style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(234, 234, 234, 0.8); z-index: 1;"></div>
+             <div class="z-10 relative max-w-3xl px-6 scroll-animate fade-in">
+                 <script>
+                    const heroSection = document.getElementById('hero');
+                    const heroImg = new Image();
+                    heroImg.src = 'hero-background.jpg';
+                    heroImg.onerror = function() {
+                        console.error("Hero image failed to load.");
+                        // Keep the fallback background color visible
+                        heroSection.style.backgroundImage = 'none';
+                    };
+                    heroImg.onload = function() {
+                        // Image loaded successfully, ensure background is set
+                         heroSection.style.backgroundImage = `url('${heroImg.src}')`;
+                    }
+                </script>
+                <h1 class="text-5xl md:text-7xl font-serif font-bold text-brand-charcoal mb-4">Crafting Legacy</h1>
+                <p class="text-lg md:text-xl font-sans text-brand-charcoal mb-8">Bespoke creations, meticulously handcrafted with passion and precision.</p>
+                <a href="#portfolio" class="inline-block bg-brand-gold text-white font-bold py-3 px-8 rounded-md hover:bg-brand-bronze transition duration-300 ease-smooth shadow-md">
+                    Explore the Collection
+                </a>
+            </div>
+        </section>
+
+        <section id="about" class="py-20 md:py-32 bg-brand-offwhite">
+            <div class="container mx-auto px-6 grid md:grid-cols-2 gap-12 items-center">
+                <div class="scroll-animate slide-in-left">
+                    <img src="artisan-portrait.jpg" alt="Portrait of the Artisan in their workshop" class="rounded-lg shadow-xl w-full h-auto object-cover max-w-md mx-auto md:mx-0"
+                         onerror="this.onerror=null; this.src='https://placehold.co/600x400/EAEAEA/333333?text=Artisan+Portrait'; this.alt='Placeholder image: Artisan Portrait'">
+                </div>
+                <div class="scroll-animate slide-in-right">
+                    <h2 class="text-3xl md:text-4xl font-serif font-bold text-brand-charcoal mb-6">The Soul of the Craft</h2>
+                    <p class="text-lg font-sans text-brand-charcoal mb-4 leading-relaxed">
+                        Driven by a dedication to timeless techniques and sustainable materials, each piece is more than an object – it's a story whispered through form and texture. We believe in the enduring beauty of handcrafted quality.
+                    </p>
+                    <p class="text-lg font-sans text-brand-charcoal mb-6 leading-relaxed">
+                        From initial sketch to final polish, every step is infused with intention and care, resulting in unique heirlooms designed to last generations.
+                    </p>
+                    <a href="#contact" class="inline-block text-brand-gold font-bold link-underline hover:text-brand-bronze transition duration-300">
+                        Commission Your Piece &rarr;
+                    </a>
+                </div>
+            </div>
+        </section>
+
+        <section id="portfolio" class="py-20 md:py-32 bg-brand-lightgrey">
+            <div class="container mx-auto px-6">
+                <h2 class="text-3xl md:text-4xl font-serif font-bold text-brand-charcoal text-center mb-16 scroll-animate fade-in">Featured Works</h2>
+                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
+                    <div class="portfolio-item group scroll-animate fade-in" data-src="portfolio-item-01.jpg" data-caption="Elegant Walnut Side Table - A blend of modern lines and classic joinery.">
+                        <div class="overflow-hidden rounded-lg shadow-lg cursor-pointer">
+                            <img src="portfolio-item-01.jpg" alt="Elegant Walnut Side Table" class="w-full h-72 object-cover group-hover:scale-105 transition-transform duration-500 ease-smooth"
+                                 onerror="this.onerror=null; this.src='https://placehold.co/600x450/EAEAEA/333333?text=Portfolio+Item+1'; this.alt='Placeholder image: Portfolio Item 1'">
+                        </div>
+                        <h3 class="text-xl font-serif font-semibold mt-4 text-center text-brand-charcoal group-hover:text-brand-gold transition duration-300">Walnut Side Table</h3>
+                    </div>
+                    <div class="portfolio-item group scroll-animate fade-in" data-src="portfolio-item-02.jpg" data-caption="Reactive Glaze Ceramic Vase - Unique patterns formed in the kiln.">
+                         <div class="overflow-hidden rounded-lg shadow-lg cursor-pointer">
+                            <img src="portfolio-item-02.jpg" alt="Reactive Glaze Ceramic Vase" class="w-full h-72 object-cover group-hover:scale-105 transition-transform duration-500 ease-smooth"
+                                 onerror="this.onerror=null; this.src='https://placehold.co/600x450/EAEAEA/333333?text=Portfolio+Item+2'; this.alt='Placeholder image: Portfolio Item 2'">
+                        </div>
+                        <h3 class="text-xl font-serif font-semibold mt-4 text-center text-brand-charcoal group-hover:text-brand-gold transition duration-300">Ceramic Vase</h3>
+                    </div>
+                    <div class="portfolio-item group scroll-animate fade-in" data-src="portfolio-item-03.jpg" data-caption="Hand-Hammered Silver Necklace - Featuring a central lapis lazuli gemstone.">
+                         <div class="overflow-hidden rounded-lg shadow-lg cursor-pointer">
+                            <img src="portfolio-item-03.jpg" alt="Hand-Hammered Silver Necklace" class="w-full h-72 object-cover group-hover:scale-105 transition-transform duration-500 ease-smooth"
+                                 onerror="this.onerror=null; this.src='https://placehold.co/600x450/EAEAEA/333333?text=Portfolio+Item+3'; this.alt='Placeholder image: Portfolio Item 3'">
+                        </div>
+                        <h3 class="text-xl font-serif font-semibold mt-4 text-center text-brand-charcoal group-hover:text-brand-gold transition duration-300">Silver Necklace</h3>
+                    </div>
+                    <div class="portfolio-item group scroll-animate fade-in" data-src="portfolio-item-04.jpg" data-caption="Bespoke Leather Journal Cover - Hand-stitched with intricate tooling.">
+                         <div class="overflow-hidden rounded-lg shadow-lg cursor-pointer">
+                            <img src="portfolio-item-04.jpg" alt="Bespoke Leather Journal Cover" class="w-full h-72 object-cover group-hover:scale-105 transition-transform duration-500 ease-smooth"
+                                 onerror="this.onerror=null; this.src='https://placehold.co/600x450/EAEAEA/333333?text=Portfolio+Item+4'; this.alt='Placeholder image: Portfolio Item 4'">
+                        </div>
+                        <h3 class="text-xl font-serif font-semibold mt-4 text-center text-brand-charcoal group-hover:text-brand-gold transition duration-300">Leather Journal</h3>
+                    </div>
+                     <div class="portfolio-item group scroll-animate fade-in" data-src="portfolio-item-05.jpg" data-caption="Custom Acoustic Guitar - Built with fine spruce and rosewood.">
+                         <div class="overflow-hidden rounded-lg shadow-lg cursor-pointer">
+                            <img src="portfolio-item-05.jpg" alt="Custom Acoustic Guitar" class="w-full h-72 object-cover group-hover:scale-105 transition-transform duration-500 ease-smooth"
+                                 onerror="this.onerror=null; this.src='https://placehold.co/600x450/EAEAEA/333333?text=Portfolio+Item+5'; this.alt='Placeholder image: Portfolio Item 5'">
+                        </div>
+                        <h3 class="text-xl font-serif font-semibold mt-4 text-center text-brand-charcoal group-hover:text-brand-gold transition duration-300">Acoustic Guitar</h3>
+                    </div>
+                     <div class="portfolio-item group scroll-animate fade-in" data-src="portfolio-item-06.jpg" data-caption="Sculptural Floor Lamp - Combining reclaimed wood and brass elements.">
+                         <div class="overflow-hidden rounded-lg shadow-lg cursor-pointer">
+                            <img src="portfolio-item-06.jpg" alt="Sculptural Floor Lamp" class="w-full h-72 object-cover group-hover:scale-105 transition-transform duration-500 ease-smooth"
+                                 onerror="this.onerror=null; this.src='https://placehold.co/600x450/EAEAEA/333333?text=Portfolio+Item+6'; this.alt='Placeholder image: Portfolio Item 6'">
+                        </div>
+                        <h3 class="text-xl font-serif font-semibold mt-4 text-center text-brand-charcoal group-hover:text-brand-gold transition duration-300">Floor Lamp</h3>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="process" class="py-20 md:py-32 bg-brand-offwhite">
+            <div class="container mx-auto px-6 max-w-3xl">
+                <h2 class="text-3xl md:text-4xl font-serif font-bold text-brand-charcoal text-center mb-16 scroll-animate fade-in">Our Creative Journey</h2>
+                <div class="relative"> <div class="process-step scroll-animate slide-in-left">
+                        <h3 class="text-2xl font-serif font-semibold mb-2 text-brand-charcoal">1. Consultation & Design</h3>
+                        <p class="text-brand-charcoal mb-4">We begin by understanding your vision, discussing ideas, materials, and sketching initial concepts.</p>
+                        <img src="process-step-01.jpg" alt="Sketching design ideas" class="w-full max-w-xs h-auto rounded-md shadow-md"
+                             onerror="this.onerror=null; this.src='https://placehold.co/400x250/F8F8F8/333333?text=Process+Step+1'; this.alt='Placeholder image: Process Step 1'">
+                    </div>
+                    <div class="process-step scroll-animate slide-in-left">
+                        <h3 class="text-2xl font-serif font-semibold mb-2 text-brand-charcoal">2. Material Selection</h3>
+                        <p class="text-brand-charcoal mb-4">Only the finest, sustainably sourced materials are chosen, ensuring both beauty and longevity.</p>
+                         <img src="process-step-02.jpg" alt="Selecting raw materials" class="w-full max-w-xs h-auto rounded-md shadow-md"
+                             onerror="this.onerror=null; this.src='https://placehold.co/400x250/F8F8F8/333333?text=Process+Step+2'; this.alt='Placeholder image: Process Step 2'">
+                    </div>
+                    <div class="process-step scroll-animate slide-in-left">
+                        <h3 class="text-2xl font-serif font-semibold mb-2 text-brand-charcoal">3. Meticulous Crafting</h3>
+                        <p class="text-brand-charcoal mb-4">Skilled hands bring the design to life, employing traditional techniques with precision and care.</p>
+                         <img src="process-step-03.jpg" alt="Hands shaping the material" class="w-full max-w-xs h-auto rounded-md shadow-md"
+                             onerror="this.onerror=null; this.src='https://placehold.co/400x250/F8F8F8/333333?text=Process+Step+3'; this.alt='Placeholder image: Process Step 3'">
+                    </div>
+                    <div class="process-step scroll-animate slide-in-left">
+                        <h3 class="text-2xl font-serif font-semibold mb-2 text-brand-charcoal">4. Finishing Touches</h3>
+                        <p class="text-brand-charcoal mb-4">The final stage involves careful finishing, polishing, and quality checks to perfect every detail.</p>
+                         <img src="process-step-04.jpg" alt="Applying finish to the piece" class="w-full max-w-xs h-auto rounded-md shadow-md"
+                             onerror="this.onerror=null; this.src='https://placehold.co/400x250/F8F8F8/333333?text=Process+Step+4'; this.alt='Placeholder image: Process Step 4'">
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="contact" class="py-20 md:py-32 bg-brand-lightgrey">
+            <div class="container mx-auto px-6 max-w-2xl text-center">
+                <h2 class="text-3xl md:text-4xl font-serif font-bold text-brand-charcoal mb-6 scroll-animate fade-in">Commission Your Vision</h2>
+                <p class="text-lg text-brand-charcoal mb-10 scroll-animate fade-in">
+                    Ready to bring your unique idea to life? Fill out the form below or reach out directly to discuss your project.
+                </p>
+                <div id="form-message" class="scroll-animate fade-in"></div>
+                <form id="contact-form" class="space-y-6 scroll-animate fade-in">
+                    <div>
+                        <label for="name" class="sr-only">Name</label>
+                        <input type="text" id="name" name="name" placeholder="Your Name" required class="w-full px-4 py-3 rounded-md border border-gray-300 bg-white focus:border-brand-gold transition duration-300">
+                    </div>
+                    <div>
+                        <label for="email" class="sr-only">Email</label>
+                        <input type="email" id="email" name="email" placeholder="Your Email Address" required class="w-full px-4 py-3 rounded-md border border-gray-300 bg-white focus:border-brand-gold transition duration-300">
+                    </div>
+                    <div>
+                        <label for="message" class="sr-only">Message</label>
+                        <textarea id="message" name="message" rows="5" placeholder="Tell us about your project..." required class="w-full px-4 py-3 rounded-md border border-gray-300 bg-white focus:border-brand-gold transition duration-300"></textarea>
+                    </div>
+                    <div>
+                        <button type="submit" class="inline-block bg-brand-gold text-white font-bold py-3 px-10 rounded-md hover:bg-brand-bronze transition duration-300 ease-smooth shadow-md focus:outline-none focus:ring-2 focus:ring-brand-gold focus:ring-offset-2 focus:ring-offset-brand-lightgrey">
+                            Send Inquiry
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </section>
+
+    </main>
+
+    <footer class="bg-brand-charcoal text-brand-lightgrey py-10">
+        <div class="container mx-auto px-6 text-center">
+            <p class="mb-4">&copy; <span id="current-year"></span> Artisan's Atelier. All Rights Reserved.</p>
+            <div class="flex justify-center space-x-4">
+                <a href="#" aria-label="Instagram" class="text-brand-lightgrey hover:text-brand-gold transition duration-300">
+                    <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true"> /* Instagram Icon SVG */ </svg>
+                </a>
+                <a href="#" aria-label="Pinterest" class="text-brand-lightgrey hover:text-brand-gold transition duration-300">
+                     <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true"> /* Pinterest Icon SVG */ </svg>
+                </a>
+                </div>
+             <script>
+                document.querySelectorAll('footer svg').forEach(svg => {
+                    if (!svg.innerHTML.trim()) { // Check if SVG is empty
+                        const label = svg.closest('a').getAttribute('aria-label');
+                        svg.innerHTML = `<path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8z"/>`; // Simple circle as placeholder
+                         console.warn(`Placeholder SVG used for ${label}`);
+                    }
+                });
+            </script>
+        </div>
+    </footer>
+
+    <div id="portfolio-modal" class="modal">
+        <span class="modal-close" id="modal-close-button">&times;</span>
+        <img class="modal-content" id="modal-image" src="" alt="Portfolio Item Detail">
+        <div id="modal-caption" class="modal-caption"></div>
+    </div>
+
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+
+            // --- Sticky Header ---
+            const header = document.getElementById('main-header');
+            const stickyPoint = 50; // Pixels scrolled before header becomes sticky
+
+            window.addEventListener('scroll', () => {
+                if (window.scrollY > stickyPoint) {
+                    header.classList.add('sticky', 'bg-brand-offwhite/95', 'backdrop-blur-sm', 'shadow-md');
+                } else {
+                    header.classList.remove('sticky', 'bg-brand-offwhite/95', 'backdrop-blur-sm', 'shadow-md');
+                }
+            });
+
+            // --- Mobile Menu ---
+            const mobileMenuButton = document.getElementById('mobile-menu-button');
+            const mobileMenu = document.getElementById('mobile-menu');
+            const closeMobileMenuButton = document.getElementById('close-mobile-menu');
+            const mobileNavLinks = mobileMenu.querySelectorAll('.mobile-nav-link');
+
+            mobileMenuButton.addEventListener('click', () => {
+                mobileMenu.classList.remove('hidden', 'translate-x-full');
+                mobileMenu.classList.add('translate-x-0');
+            });
+
+            closeMobileMenuButton.addEventListener('click', () => {
+                mobileMenu.classList.add('translate-x-full');
+                 mobileMenu.classList.remove('translate-x-0');
+                // Optional: Add hidden class back after transition
+                // setTimeout(() => mobileMenu.classList.add('hidden'), 300);
+            });
+
+            // Close menu when a link is clicked
+            mobileNavLinks.forEach(link => {
+                link.addEventListener('click', () => {
+                    mobileMenu.classList.add('translate-x-full');
+                    mobileMenu.classList.remove('translate-x-0');
+                    // setTimeout(() => mobileMenu.classList.add('hidden'), 300);
+                });
+            });
+
+            // --- Smooth Scrolling (for browsers that don't support scroll-behavior: smooth) ---
+            // Basic fallback, modern browsers handle this with CSS `scroll-smooth`
+            document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+                anchor.addEventListener('click', function (e) {
+                    const href = this.getAttribute('href');
+                    // Ensure it's a valid internal link and not just '#'
+                    if (href.length > 1 && document.querySelector(href)) {
+                        e.preventDefault();
+                        document.querySelector(href).scrollIntoView({
+                            behavior: 'smooth'
+                        });
+                        // Close mobile menu if open and link is clicked
+                        if (!mobileMenu.classList.contains('translate-x-full')) {
+                             mobileMenu.classList.add('translate-x-full');
+                             mobileMenu.classList.remove('translate-x-0');
+                        }
+                    }
+                });
+            });
+
+
+            // --- Scroll Animations ---
+            const animatedElements = document.querySelectorAll('.scroll-animate');
+
+            const observer = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        // Determine animation type from class list
+                        if (entry.target.classList.contains('fade-in')) {
+                             entry.target.classList.add('visible', 'fade-in');
+                        } else if (entry.target.classList.contains('slide-in-left')) {
+                             entry.target.classList.add('visible', 'slide-in-left');
+                        } else if (entry.target.classList.contains('slide-in-right')) {
+                             entry.target.classList.add('visible', 'slide-in-right');
+                        } else {
+                            // Default fallback if no specific animation class found
+                             entry.target.classList.add('visible', 'fade-in');
+                        }
+                        observer.unobserve(entry.target); // Stop observing once animated
+                    }
+                });
+            }, {
+                threshold: 0.1 // Trigger when 10% of the element is visible
+            });
+
+            animatedElements.forEach(el => {
+                observer.observe(el);
+            });
+
+             // --- Portfolio Modal ---
+            const modal = document.getElementById('portfolio-modal');
+            const modalImage = document.getElementById('modal-image');
+            const modalCaption = document.getElementById('modal-caption');
+            const closeModalButton = document.getElementById('modal-close-button');
+            const portfolioItems = document.querySelectorAll('.portfolio-item');
+
+            portfolioItems.forEach(item => {
+                item.addEventListener('click', () => {
+                    const imgSrc = item.getAttribute('data-src');
+                    const caption = item.getAttribute('data-caption');
+                    const imgElement = item.querySelector('img'); // Get the actual img element
+
+                    modalImage.src = imgSrc || imgElement.src; // Use data-src first, fallback to img src
+                    modalImage.alt = caption || imgElement.alt || "Portfolio image detail"; // Use data-caption, fallback to img alt
+                    modalCaption.textContent = caption || imgElement.alt || ""; // Use data-caption, fallback to img alt
+
+                    // Handle image load error within the modal
+                    modalImage.onerror = function() {
+                        console.error("Modal image failed to load:", this.src);
+                        modalImage.src = 'https://placehold.co/800x600/333333/cccccc?text=Image+Not+Found';
+                        modalImage.alt = 'Image not found';
+                        modalCaption.textContent = caption + " (Image failed to load)";
+                    }
+
+                    modal.classList.add('flex'); // Show modal using flex display
+                });
+            });
+
+            // Close modal functionality
+            const closeModal = () => {
+                modal.classList.remove('flex');
+                 // Reset src to prevent showing old image briefly on next open
+                modalImage.src = "";
+                modalImage.alt = "";
+                modalCaption.textContent = "";
+            }
+
+            closeModalButton.addEventListener('click', closeModal);
+
+            // Close modal if clicking outside the image content
+            modal.addEventListener('click', (event) => {
+                if (event.target === modal) { // Check if the click is on the modal background itself
+                    closeModal();
+                }
+            });
+
+            // Close modal with Escape key
+            document.addEventListener('keydown', (event) => {
+                if (event.key === 'Escape' && modal.classList.contains('flex')) {
+                    closeModal();
+                }
+            });
+
+
+            // --- Contact Form Handling (Basic Example) ---
+            const contactForm = document.getElementById('contact-form');
+            const formMessage = document.getElementById('form-message');
+
+            contactForm.addEventListener('submit', (e) => {
+                e.preventDefault(); // Prevent default form submission
+
+                // Basic validation example (more robust validation recommended)
+                const name = document.getElementById('name').value.trim();
+                const email = document.getElementById('email').value.trim();
+                const message = document.getElementById('message').value.trim();
+
+                if (!name || !email || !message) {
+                    formMessage.textContent = 'Please fill out all fields.';
+                    formMessage.className = 'error'; // Add error class
+                    return; // Stop submission
+                }
+
+                // --- Simulate form submission ---
+                // In a real application, you would send this data to a server using fetch()
+                console.log('Form submitted (simulated):', { name, email, message });
+
+                // Display success message
+                formMessage.textContent = 'Thank you! Your inquiry has been sent.';
+                 formMessage.className = 'success'; // Add success class
+
+                // Clear the form
+                contactForm.reset();
+
+                // Optional: Hide the message after a few seconds
+                setTimeout(() => {
+                    formMessage.textContent = '';
+                    formMessage.className = ''; // Remove classes
+                    formMessage.style.display = 'none'; // Hide element
+                }, 5000); // Hide after 5 seconds
+            });
+
+            // --- Footer Current Year ---
+            document.getElementById('current-year').textContent = new Date().getFullYear();
+
+            // --- Lazy Loading for Images (if needed, browser support is good now) ---
+            // Add loading="lazy" attribute to img tags directly in HTML for native browser support
+            // Example: <img src="..." loading="lazy" alt="...">
+            // If more control or fallback needed:
+            /*
+            const lazyImages = document.querySelectorAll('img[loading="lazy"]');
+            if ('loading' in HTMLImageElement.prototype) {
+                // Native lazy loading supported
+                console.log("Native lazy loading supported.");
+            } else {
+                // Fallback for browsers without native support (using Intersection Observer)
+                console.log("Implementing JS lazy loading fallback.");
+                const lazyObserver = new IntersectionObserver((entries, observer) => {
+                    entries.forEach(entry => {
+                        if (entry.isIntersecting) {
+                            const img = entry.target;
+                            img.src = img.dataset.src; // Assuming you use data-src for the actual URL
+                            img.removeAttribute('loading'); // Optional: remove attribute
+                            img.classList.add('lazy-loaded'); // Optional: add class for styling
+                            observer.unobserve(img);
+                        }
+                    });
+                });
+                lazyImages.forEach(img => {
+                    // Make sure images have a data-src attribute if using this fallback
+                    if (img.dataset.src) {
+                         lazyObserver.observe(img);
+                    } else {
+                        // If no data-src, load immediately or handle differently
+                        img.src = img.src; // Load normally
+                    }
+                });
+            }
+            */
+             // Add loading="lazy" to portfolio images dynamically for demonstration
+             document.querySelectorAll('.portfolio-item img').forEach(img => {
+                 img.setAttribute('loading', 'lazy');
+             });
+              document.querySelectorAll('.process-step img').forEach(img => {
+                 img.setAttribute('loading', 'lazy');
+             });
+             // Portrait image too
+              const portraitImg = document.querySelector('#about img');
+              if (portraitImg) portraitImg.setAttribute('loading', 'lazy');
+
+
+        }); // End DOMContentLoaded
+    </script>
+
+</body>
+</html>

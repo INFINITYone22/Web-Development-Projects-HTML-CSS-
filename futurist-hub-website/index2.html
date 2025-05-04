@@ -1,0 +1,790 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>INFINITYone - The Futurist's Hub</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Exo+2:wght@400;700&family=Inter:wght@300;400;700&family=Roboto+Mono:wght@400;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <style>
+        /* Define CSS Custom Properties (Variables) based on the desired theme */
+        :root {
+            --font-heading: 'Orbitron', 'Exo 2', sans-serif;
+            --font-sans: 'Inter', sans-serif;
+            --font-mono: 'Roboto Mono', monospace;
+
+            --color-dark-bg: #0A0F1E;
+            --color-dark-bg-alt: #050810;
+            --color-light-text: #E0E0E0;
+            --color-light-text-alt: #F5F5F5;
+            --color-blue: #00BFFF;
+            --color-cyan: #00FFFF;
+            --color-magenta: #FF00FF;
+            --color-purple: #9400D3;
+
+            --shadow-neon-blue: 0 0 5px var(--color-blue), 0 0 10px var(--color-blue), 0 0 15px var(--color-blue);
+            --shadow-neon-cyan: 0 0 5px var(--color-cyan), 0 0 10px var(--color-cyan), 0 0 15px var(--color-cyan);
+            --shadow-neon-magenta: 0 0 5px var(--color-magenta), 0 0 10px var(--color-magenta), 0 0 15px var(--color-magenta);
+
+            --transition-smooth: cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        /* Apply base styles using CSS variables */
+        body {
+            font-family: var(--font-sans);
+            color: var(--color-light-text);
+            background-color: var(--color-dark-bg);
+            overflow-x: hidden; /* Prevent horizontal scroll */
+        }
+
+        h1, h2, h3, h4, h5, h6 {
+            font-family: var(--font-heading);
+            color: var(--color-light-text-alt);
+        }
+
+        /* Custom scrollbar for webkit browsers */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: var(--color-dark-bg-alt);
+        }
+        ::-webkit-scrollbar-thumb {
+            background: var(--color-blue);
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: var(--color-cyan);
+        }
+
+        /* Style for elements animated on scroll */
+        .scroll-animate {
+            opacity: 0;
+            transition: opacity 0.8s ease-out, transform 0.8s ease-out;
+        }
+        .scroll-animate.fade-in { opacity: 0; }
+        .scroll-animate.slide-in-up { opacity: 0; transform: translateY(30px); }
+        .scroll-animate.slide-in-left { opacity: 0; transform: translateX(-30px); }
+        .scroll-animate.slide-in-right { opacity: 0; transform: translateX(30px); }
+
+        .scroll-animate.visible {
+            opacity: 1;
+            transform: translate(0, 0);
+        }
+
+        /* Sticky Header */
+        #main-header.sticky {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 50;
+            background-color: rgba(10, 15, 30, 0.85); /* Semi-transparent dark bg */
+            backdrop-filter: blur(10px);
+            box-shadow: 0 2px 10px rgba(0, 191, 255, 0.1); /* Subtle neon blue shadow */
+            animation: slideDownHeader 0.5s ease-out;
+        }
+        @keyframes slideDownHeader {
+            from { transform: translateY(-100%); }
+            to { transform: translateY(0); }
+        }
+
+        /* Mobile Menu Styling */
+        #mobile-menu {
+            transition: transform 0.4s var(--transition-smooth);
+            background-color: var(--color-dark-bg-alt); /* Slightly different bg */
+            box-shadow: -5px 0 15px rgba(0, 0, 0, 0.3);
+        }
+        #mobile-menu.hidden {
+            transform: translateX(100%);
+        }
+
+        /* Article Card Hover Effect - Neon Border */
+        .article-card {
+            position: relative;
+            overflow: hidden; /* Contain the pseudo-element */
+            transition: transform 0.3s ease-out, box-shadow 0.3s ease-out;
+        }
+        .article-card::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; right: 0; bottom: 0;
+            border: 2px solid transparent;
+            border-radius: inherit; /* Match parent border-radius */
+            pointer-events: none;
+            transition: border-color 0.3s ease-out, box-shadow 0.3s ease-out; /* Added box-shadow transition */
+        }
+        .article-card:hover {
+            transform: translateY(-5px) scale(1.02); /* Lift and slightly scale */
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.4);
+        }
+        .article-card:hover::before {
+            border-color: var(--color-cyan); /* Neon border on hover */
+            box-shadow: var(--shadow-neon-cyan); /* Add glow */
+        }
+        .article-card img {
+            transition: transform 0.4s ease-out;
+        }
+        .article-card:hover img {
+             transform: scale(1.05); /* Subtle zoom on image */
+        }
+
+        /* Link Hover */
+        .nav-link {
+            position: relative;
+            padding-bottom: 4px;
+        }
+        .nav-link::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 0;
+            height: 2px;
+            background-color: var(--color-cyan);
+            transition: width 0.3s var(--transition-smooth);
+            box-shadow: var(--shadow-neon-cyan);
+        }
+        .nav-link:hover::after {
+            width: 100%;
+        }
+        .nav-link:hover {
+            color: var(--color-cyan);
+        }
+
+        /* Button Styling */
+        .btn-primary {
+            position: relative;
+            overflow: hidden;
+            z-index: 1;
+            transition: color 0.4s ease-out, transform 0.2s ease-out, box-shadow 0.3s ease-out; /* Added box-shadow transition */
+            background: linear-gradient(45deg, var(--color-blue), var(--color-cyan));
+            box-shadow: 0 4px 15px rgba(0, 191, 255, 0.3);
+        }
+        .btn-primary:hover {
+            color: var(--color-dark-bg);
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(0, 255, 255, 0.4);
+        }
+        .btn-primary::before { /* Shine effect on hover */
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(120deg, rgba(255,255,255,0) 0%, rgba(255,255,255,0.3) 50%, rgba(255,255,255,0) 100%);
+            transform: skewX(-25deg);
+            transition: left 0.6s ease-out;
+            z-index: -1;
+        }
+        .btn-primary:hover::before {
+            left: 100%;
+        }
+        .btn-primary:active {
+            transform: translateY(0px) scale(0.98);
+            box-shadow: 0 2px 10px rgba(0, 255, 255, 0.3);
+        }
+
+        /* Form Input Styling */
+        input[type="text"], input[type="email"], textarea {
+            background-color: rgba(255, 255, 255, 0.05); /* Slightly transparent white */
+            border: 1px solid rgba(0, 191, 255, 0.3); /* Subtle neon border */
+            color: var(--color-light-text);
+            transition: border-color 0.3s ease, box-shadow 0.3s ease;
+        }
+        input[type="text"]::placeholder, input[type="email"]::placeholder, textarea::placeholder {
+            color: rgba(224, 224, 224, 0.5); /* Lighter placeholder */
+        }
+        input[type="text"]:focus, input[type="email"]:focus, textarea:focus {
+            outline: none;
+            border-color: var(--color-cyan);
+            box-shadow: 0 0 0 3px rgba(0, 255, 255, 0.2), var(--shadow-neon-cyan);
+        }
+
+        /* Glitch Effect Keyframes (Example) */
+         @keyframes glitch {
+            0%, 100% { transform: translate(0, 0); opacity: 1; }
+            10% { transform: translate(-2px, -1px); opacity: 0.8; }
+            20% { transform: translate(2px, 1px); opacity: 1; }
+            30% { transform: translate(-2px, 1px); opacity: 0.9; }
+            40% { transform: translate(2px, -1px); opacity: 1; }
+            50% { transform: translate(-1px, 2px); opacity: 0.8; }
+            60% { transform: translate(1px, -2px); opacity: 1; }
+            70% { transform: translate(-1px, 1px); opacity: 0.9; }
+            80% { transform: translate(1px, -1px); opacity: 1; }
+            90% { transform: translate(-2px, 0); opacity: 0.8; }
+        }
+        .animate-glitch {
+             animation: glitch 0.5s linear forwards;
+        }
+
+
+        /* Message Box Styling */
+        #form-message {
+            display: none; /* Hidden by default */
+            padding: 1rem;
+            margin-top: 1rem;
+            border-radius: 0.5rem;
+            text-align: center;
+            font-weight: bold;
+            border-width: 1px;
+            border-style: solid;
+        }
+        #form-message.success {
+            background-color: rgba(0, 255, 127, 0.1); /* Neon green tint */
+            color: #90EE90; /* Light Green */
+            border-color: #90EE90;
+            box-shadow: 0 0 10px rgba(144, 238, 144, 0.5);
+            display: block; /* Show on success */
+        }
+        #form-message.error {
+            background-color: rgba(255, 0, 0, 0.1); /* Red tint */
+            color: #FF6347; /* Tomato Red */
+            border-color: #FF6347;
+            box-shadow: 0 0 10px rgba(255, 99, 71, 0.5);
+            display: block; /* Show on error */
+        }
+
+        /* Search Overlay */
+        #search-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(10, 15, 30, 0.95); /* Dark bg with high opacity */
+            backdrop-filter: blur(5px);
+            z-index: 100;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 0.3s ease, visibility 0s linear 0.3s;
+        }
+        #search-overlay.visible {
+            opacity: 1;
+            visibility: visible;
+            transition: opacity 0.3s ease;
+        }
+        #search-overlay input {
+            width: 80%;
+            max-width: 600px;
+            font-size: 1.5rem;
+            padding: 1rem;
+            background: transparent;
+            border: none;
+            border-bottom: 2px solid var(--color-cyan);
+            color: var(--color-light-text-alt);
+        }
+         #search-overlay input:focus {
+             box-shadow: none; /* Override default focus */
+             outline: none; /* Remove default outline */
+             border-bottom-color: var(--color-magenta);
+         }
+        #close-search {
+            position: absolute;
+            top: 30px;
+            right: 30px;
+            font-size: 2rem;
+            color: var(--color-light-text);
+            cursor: pointer;
+            transition: color 0.3s ease, transform 0.3s ease;
+        }
+         #close-search:hover {
+             color: var(--color-cyan);
+             transform: rotate(90deg);
+         }
+
+         /* Tailwind Config Script Removed - Configuration is now done via CSS Variables above */
+
+    </style>
+    </head>
+<body class="bg-brand-dark-bg text-brand-light-text antialiased">
+
+    <header id="main-header" class="w-full transition-all duration-300 ease-smooth py-4 z-50">
+        <div class="container mx-auto px-6 flex justify-between items-center">
+            <a href="#hero" class="text-2xl font-heading font-bold text-brand-light-text-alt hover:text-brand-cyan transition duration-300 flex items-center">
+                 <i class="fas fa-rocket mr-2 text-brand-blue"></i> FuturistHub
+            </a>
+
+            <nav class="hidden md:flex items-center space-x-8">
+                <a href="#articles" class="nav-link text-brand-light-text transition duration-300">Articles</a>
+                <a href="#about" class="nav-link text-brand-light-text transition duration-300">About</a>
+                <a href="#contact" class="nav-link text-brand-light-text transition duration-300">Contact</a>
+                <button id="search-button" aria-label="Search" class="text-brand-light-text hover:text-brand-cyan transition duration-300">
+                    <i class="fas fa-search fa-lg"></i>
+                </button>
+            </nav>
+
+            <div class="md:hidden flex items-center space-x-4">
+                 <button id="search-button-mobile" aria-label="Search" class="text-brand-light-text hover:text-brand-cyan transition duration-300">
+                    <i class="fas fa-search fa-lg"></i>
+                </button>
+                <button id="mobile-menu-button" aria-label="Open Menu" class="text-brand-light-text focus:outline-none">
+                    <i class="fas fa-bars fa-lg"></i>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <div id="mobile-menu" class="fixed top-0 right-0 h-full w-64 p-8 transform translate-x-full transition-transform duration-300 ease-smooth z-40 md:hidden">
+        <button id="close-mobile-menu" aria-label="Close Menu" class="absolute top-6 right-6 text-brand-light-text hover:text-brand-cyan transition duration-300">
+            <i class="fas fa-times fa-lg"></i>
+        </button>
+        <nav class="flex flex-col space-y-6 mt-16">
+            <a href="#articles" class="text-lg hover:text-brand-cyan transition duration-300 mobile-nav-link">Articles</a>
+            <a href="#about" class="text-lg hover:text-brand-cyan transition duration-300 mobile-nav-link">About</a>
+            <a href="#contact" class="text-lg hover:text-brand-cyan transition duration-300 mobile-nav-link">Contact</a>
+        </nav>
+    </div>
+
+    <div id="search-overlay">
+        <button id="close-search" aria-label="Close Search">&times;</button>
+        <input type="text" id="search-input" placeholder="Search the future..." class="focus:outline-none">
+    </div>
+
+
+    <main>
+
+        <section id="hero" class="min-h-screen flex items-center justify-center text-center relative overflow-hidden bg-brand-dark-bg-alt">
+            <div class="absolute inset-0 z-0 opacity-30">
+                <img src="hero-visual-01.jpg" alt="Abstract futuristic background" class="w-full h-full object-cover"
+                     onerror="this.style.backgroundColor='var(--color-dark-bg-alt)'; this.alt='Abstract background placeholder'; this.src='';">
+                 </div>
+
+            <div class="z-10 relative max-w-4xl px-6">
+                <h1 id="hero-headline" class="text-5xl md:text-7xl lg:text-8xl font-heading font-bold text-brand-light-text-alt mb-6 opacity-0" style="text-shadow: 0 0 10px var(--color-blue);">
+                    Decoding Tomorrow
+                </h1>
+                <p class="text-lg md:text-xl font-sans text-brand-light-text mb-10 scroll-animate fade-in" style="animation-delay: 0.5s;">
+                    Exploring the frontiers of technology, science, and human potential.
+                </p>
+                <a href="#articles" class="btn-primary inline-block text-white font-bold py-3 px-10 rounded-md text-lg scroll-animate fade-in" style="animation-delay: 0.8s;">
+                    Explore Articles
+                </a>
+            </div>
+             <div id="particles-js" class="absolute inset-0 z-0"></div> </section>
+
+        <section id="articles" class="py-20 md:py-32 bg-brand-dark-bg">
+            <div class="container mx-auto px-6">
+                <h2 class="text-3xl md:text-4xl lg:text-5xl font-heading font-bold text-brand-light-text-alt text-center mb-16 scroll-animate fade-in">Latest Insights</h2>
+                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-10">
+                    <div class="article-card bg-brand-dark-bg-alt rounded-lg shadow-lg overflow-hidden scroll-animate slide-in-up">
+                        <a href="#" class="block">
+                            <div class="overflow-hidden h-56">
+                                <img src="article-placeholder.jpg" alt="AI Brain concept" class="w-full h-full object-cover"
+                                     onerror="this.onerror=null; this.src='https://placehold.co/600x400/0A0F1E/E0E0E0?text=AI+Concept'; this.alt='Placeholder: AI Concept'">
+                            </div>
+                            <div class="p-6">
+                                <span class="inline-block bg-brand-blue/20 text-brand-cyan text-xs font-semibold px-2 py-1 rounded mb-3">AI & ML</span>
+                                <h3 class="text-xl font-heading font-semibold mb-3 text-brand-light-text-alt hover:text-brand-cyan transition duration-300">The Next Leap in Artificial General Intelligence</h3>
+                                <p class="text-brand-light-text text-sm opacity-80 mb-4">Exploring the pathways and potential roadblocks towards achieving true AGI.</p>
+                                <span class="text-xs text-brand-light-text opacity-60">May 1, 2025 | 5 min read</span>
+                            </div>
+                        </a>
+                    </div>
+                    <div class="article-card bg-brand-dark-bg-alt rounded-lg shadow-lg overflow-hidden scroll-animate slide-in-up" style="animation-delay: 0.1s;">
+                        <a href="#" class="block">
+                            <div class="overflow-hidden h-56">
+                                <img src="article-placeholder.jpg" alt="CRISPR gene editing concept" class="w-full h-full object-cover"
+                                     onerror="this.onerror=null; this.src='https://placehold.co/600x400/0A0F1E/E0E0E0?text=BioTech'; this.alt='Placeholder: BioTech'">
+                            </div>
+                            <div class="p-6">
+                                <span class="inline-block bg-brand-magenta/20 text-brand-magenta text-xs font-semibold px-2 py-1 rounded mb-3">Biotechnology</span>
+                                <h3 class="text-xl font-heading font-semibold mb-3 text-brand-light-text-alt hover:text-brand-cyan transition duration-300">CRISPR 2.0: Beyond Gene Editing</h3>
+                                <p class="text-brand-light-text text-sm opacity-80 mb-4">New applications of CRISPR technology are emerging, promising revolutions in medicine and beyond.</p>
+                                <span class="text-xs text-brand-light-text opacity-60">April 28, 2025 | 7 min read</span>
+                            </div>
+                        </a>
+                    </div>
+                    <div class="article-card bg-brand-dark-bg-alt rounded-lg shadow-lg overflow-hidden scroll-animate slide-in-up" style="animation-delay: 0.2s;">
+                        <a href="#" class="block">
+                            <div class="overflow-hidden h-56">
+                                <img src="article-placeholder.jpg" alt="Quantum computing visualization" class="w-full h-full object-cover"
+                                     onerror="this.onerror=null; this.src='https://placehold.co/600x400/0A0F1E/E0E0E0?text=Quantum'; this.alt='Placeholder: Quantum'">
+                            </div>
+                            <div class="p-6">
+                                <span class="inline-block bg-brand-purple/20 text-brand-purple text-xs font-semibold px-2 py-1 rounded mb-3">Quantum Computing</span>
+                                <h3 class="text-xl font-heading font-semibold mb-3 text-brand-light-text-alt hover:text-brand-cyan transition duration-300">Is Quantum Supremacy Around the Corner?</h3>
+                                <p class="text-brand-light-text text-sm opacity-80 mb-4">Assessing the current state of quantum hardware and the race for computational dominance.</p>
+                                <span class="text-xs text-brand-light-text opacity-60">April 25, 2025 | 6 min read</span>
+                            </div>
+                        </a>
+                    </div>
+                     <div class="article-card bg-brand-dark-bg-alt rounded-lg shadow-lg overflow-hidden scroll-animate slide-in-up" style="animation-delay: 0.3s;">
+                        <a href="#" class="block">
+                            <div class="overflow-hidden h-56">
+                                <img src="article-placeholder.jpg" alt="Mars colonization concept art" class="w-full h-full object-cover"
+                                     onerror="this.onerror=null; this.src='https://placehold.co/600x400/0A0F1E/E0E0E0?text=Space'; this.alt='Placeholder: Space Exploration'">
+                            </div>
+                            <div class="p-6">
+                                <span class="inline-block bg-brand-blue/20 text-brand-cyan text-xs font-semibold px-2 py-1 rounded mb-3">Space Exploration</span>
+                                <h3 class="text-xl font-heading font-semibold mb-3 text-brand-light-text-alt hover:text-brand-cyan transition duration-300">The Economics of Asteroid Mining</h3>
+                                <p class="text-brand-light-text text-sm opacity-80 mb-4">Can harvesting resources from space become a trillion-dollar industry?</p>
+                                <span class="text-xs text-brand-light-text opacity-60">April 22, 2025 | 8 min read</span>
+                            </div>
+                        </a>
+                    </div>
+                     <div class="article-card bg-brand-dark-bg-alt rounded-lg shadow-lg overflow-hidden scroll-animate slide-in-up" style="animation-delay: 0.4s;">
+                        <a href="#" class="block">
+                            <div class="overflow-hidden h-56">
+                                <img src="article-placeholder.jpg" alt="Abstract network connections" class="w-full h-full object-cover"
+                                     onerror="this.onerror=null; this.src='https://placehold.co/600x400/0A0F1E/E0E0E0?text=Web3'; this.alt='Placeholder: Web3 / Blockchain'">
+                            </div>
+                            <div class="p-6">
+                                <span class="inline-block bg-brand-magenta/20 text-brand-magenta text-xs font-semibold px-2 py-1 rounded mb-3">Web3 & Decentralization</span>
+                                <h3 class="text-xl font-heading font-semibold mb-3 text-brand-light-text-alt hover:text-brand-cyan transition duration-300">Beyond the Hype: Real-World Web3 Use Cases</h3>
+                                <p class="text-brand-light-text text-sm opacity-80 mb-4">Moving past speculation to identify tangible applications of decentralized technologies.</p>
+                                <span class="text-xs text-brand-light-text opacity-60">April 19, 2025 | 6 min read</span>
+                            </div>
+                        </a>
+                    </div>
+                     <div class="article-card bg-brand-dark-bg-alt rounded-lg shadow-lg overflow-hidden scroll-animate slide-in-up" style="animation-delay: 0.5s;">
+                        <a href="#" class="block">
+                            <div class="overflow-hidden h-56">
+                                <img src="article-placeholder.jpg" alt="Futuristic city with green energy" class="w-full h-full object-cover"
+                                     onerror="this.onerror=null; this.src='https://placehold.co/600x400/0A0F1E/E0E0E0?text=Sustainability'; this.alt='Placeholder: Sustainable Tech'">
+                            </div>
+                            <div class="p-6">
+                                <span class="inline-block bg-brand-purple/20 text-brand-purple text-xs font-semibold px-2 py-1 rounded mb-3">Sustainable Tech</span>
+                                <h3 class="text-xl font-heading font-semibold mb-3 text-brand-light-text-alt hover:text-brand-cyan transition duration-300">Fusion Power: Closer Than You Think?</h3>
+                                <p class="text-brand-light-text text-sm opacity-80 mb-4">Recent breakthroughs suggest clean, limitless energy might be within reach this century.</p>
+                                <span class="text-xs text-brand-light-text opacity-60">April 15, 2025 | 7 min read</span>
+                            </div>
+                        </a>
+                    </div>
+                </div>
+                 <div class="text-center mt-16 scroll-animate fade-in">
+                     <a href="#" class="btn-primary inline-block text-white font-bold py-3 px-10 rounded-md text-lg">
+                        View All Articles
+                    </a>
+                 </div>
+            </div>
+        </section>
+
+        <section id="about" class="py-20 md:py-32 bg-brand-dark-bg-alt">
+            <div class="container mx-auto px-6 grid md:grid-cols-2 gap-12 items-center">
+                <div class="scroll-animate slide-in-left">
+                    <h2 class="text-3xl md:text-4xl lg:text-5xl font-heading font-bold text-brand-light-text-alt mb-6">Charting the Future</h2>
+                    <p class="text-lg font-sans text-brand-light-text mb-4 leading-relaxed opacity-90">
+                        FuturistHub is your navigator through the accelerating currents of technological change. We delve into the innovations shaping our world, offering insightful analysis and thought-provoking perspectives.
+                    </p>
+                    <p class="text-lg font-sans text-brand-light-text mb-6 leading-relaxed opacity-90">
+                        Our mission is to foster understanding and inspire conversation about the possibilities and challenges that lie ahead. Join our community of forward-thinkers.
+                    </p>
+                     <a href="#contact" class="nav-link inline-block text-brand-cyan font-bold hover:text-brand-light-text-alt transition duration-300 text-lg">
+                        Get In Touch &rarr;
+                    </a>
+                </div>
+                 <div class="scroll-animate slide-in-right">
+                    <img src="about-visual.jpg" alt="Stylized illustration of diverse people interacting with holographic data" class="rounded-lg shadow-xl w-full h-auto object-cover max-w-lg mx-auto md:ml-auto md:mr-0"
+                         onerror="this.onerror=null; this.src='https://placehold.co/600x450/050810/00FFFF?text=About+Visual'; this.alt='Placeholder image: Abstract representation of innovation and collaboration'">
+                </div>
+            </div>
+        </section>
+
+        <section id="contact" class="py-20 md:py-32 bg-gradient-to-b from-brand-dark-bg to-brand-dark-bg-alt">
+            <div class="container mx-auto px-6 max-w-3xl text-center">
+                <h2 class="text-3xl md:text-4xl lg:text-5xl font-heading font-bold text-brand-light-text-alt mb-6 scroll-animate fade-in">Stay Ahead of the Curve</h2>
+                <p class="text-lg text-brand-light-text mb-10 scroll-animate fade-in opacity-90">
+                    Subscribe to our newsletter for weekly insights, curated news, and exclusive content delivered straight to your inbox. Or send us a message directly.
+                </p>
+                <div id="form-message" class="mb-6 scroll-animate fade-in"></div>
+                <form id="newsletter-form" class="space-y-6 scroll-animate fade-in">
+                     <div class="flex flex-col sm:flex-row gap-4 justify-center">
+                        <label for="email" class="sr-only">Email</label>
+                        <input type="email" id="email" name="email" placeholder="Enter your email address" required class="flex-grow px-5 py-3 rounded-md border border-[rgba(0,191,255,0.3)] focus:border-brand-cyan transition duration-300 text-lg bg-[rgba(255,255,255,0.05)] text-brand-light-text placeholder-[rgba(224,224,224,0.5)] focus:outline-none focus:ring-0 focus:shadow-[0_0_0_3px_rgba(0,255,255,0.2),_var(--shadow-neon-cyan)]">
+                        <button type="submit" class="btn-primary inline-block text-white font-bold py-3 px-8 rounded-md text-lg">
+                            Subscribe Now
+                        </button>
+                    </div>
+                     <p class="text-sm text-brand-light-text opacity-70 mt-4">
+                         Need to send a detailed message? <a href="#" class="text-brand-cyan hover:underline">Contact Us Here</a>.
+                     </p>
+                </form>
+            </div>
+        </section>
+
+    </main>
+
+    <footer class="bg-brand-dark-bg-alt border-t border-brand-blue/20 pt-16 pb-10">
+        <div class="container mx-auto px-6 text-center text-brand-light-text opacity-70">
+            <div class="grid md:grid-cols-3 gap-8 mb-10 text-left">
+                <div>
+                     <h4 class="font-heading text-lg text-brand-light-text-alt mb-4">FuturistHub</h4>
+                     <p class="text-sm leading-relaxed">Exploring the frontiers of technology, science, and human potential. Decoding tomorrow, today.</p>
+                 </div>
+                 <div>
+                     <h4 class="font-heading text-lg text-brand-light-text-alt mb-4">Quick Links</h4>
+                     <ul class="space-y-2 text-sm">
+                         <li><a href="#articles" class="hover:text-brand-cyan transition duration-300">Articles</a></li>
+                         <li><a href="#about" class="hover:text-brand-cyan transition duration-300">About Us</a></li>
+                         <li><a href="#contact" class="hover:text-brand-cyan transition duration-300">Contact / Subscribe</a></li>
+                         <li><a href="#" class="hover:text-brand-cyan transition duration-300">Privacy Policy</a></li>
+                         <li><a href="#" class="hover:text-brand-cyan transition duration-300">Terms of Service</a></li>
+                     </ul>
+                 </div>
+                 <div>
+                     <h4 class="font-heading text-lg text-brand-light-text-alt mb-4">Connect</h4>
+                     <div class="flex justify-center md:justify-start space-x-5">
+                        <a href="#" aria-label="Twitter/X" class="text-brand-light-text hover:text-brand-cyan transition duration-300 text-xl">
+                            <i class="fab fa-twitter"></i>
+                        </a>
+                        <a href="#" aria-label="LinkedIn" class="text-brand-light-text hover:text-brand-cyan transition duration-300 text-xl">
+                            <i class="fab fa-linkedin-in"></i>
+                        </a>
+                        <a href="#" aria-label="Reddit" class="text-brand-light-text hover:text-brand-cyan transition duration-300 text-xl">
+                             <i class="fab fa-reddit-alien"></i>
+                        </a>
+                         <a href="#" aria-label="Github" class="text-brand-light-text hover:text-brand-cyan transition duration-300 text-xl">
+                             <i class="fab fa-github"></i>
+                        </a>
+                    </div>
+                 </div>
+            </div>
+            <hr class="border-brand-blue/10 my-8">
+            <p class="text-sm">&copy; <span id="current-year"></span> INFINITYone - FuturistHub. All Rights Reserved.</p>
+        </div>
+    </footer>
+
+
+    <script>
+        // Wrap all JS in DOMContentLoaded to ensure elements exist
+        document.addEventListener('DOMContentLoaded', () => {
+
+            // --- Sticky Header ---
+            const header = document.getElementById('main-header');
+            const stickyPoint = 20; // Pixels scrolled before header becomes sticky
+
+            // Function to handle sticky header state
+            const handleScroll = () => {
+                if (window.scrollY > stickyPoint) {
+                    header.classList.add('sticky');
+                } else {
+                    header.classList.remove('sticky');
+                }
+            };
+
+            // Initial check in case the page loads already scrolled
+            handleScroll();
+            // Add scroll event listener
+            window.addEventListener('scroll', handleScroll);
+
+
+            // --- Mobile Menu ---
+            const mobileMenuButton = document.getElementById('mobile-menu-button');
+            const mobileMenu = document.getElementById('mobile-menu');
+            const closeMobileMenuButton = document.getElementById('close-mobile-menu');
+            const mobileNavLinks = mobileMenu.querySelectorAll('.mobile-nav-link');
+
+            // Function to open mobile menu
+            const openMenu = () => {
+                mobileMenu.classList.remove('hidden', 'translate-x-full');
+                mobileMenu.classList.add('translate-x-0');
+                document.body.style.overflow = 'hidden'; // Prevent scrolling background
+            };
+
+            // Function to close mobile menu
+            const closeMenu = () => {
+                 mobileMenu.classList.add('translate-x-full');
+                 mobileMenu.classList.remove('translate-x-0');
+                 document.body.style.overflow = ''; // Restore scrolling
+                 // Optional: Add hidden class back after transition for accessibility
+                 // setTimeout(() => mobileMenu.classList.add('hidden'), 400);
+            };
+
+            // Add event listeners for mobile menu
+            if (mobileMenuButton && mobileMenu && closeMobileMenuButton && mobileNavLinks.length > 0) {
+                mobileMenuButton.addEventListener('click', openMenu);
+                closeMobileMenuButton.addEventListener('click', closeMenu);
+                mobileNavLinks.forEach(link => {
+                    link.addEventListener('click', closeMenu); // Close menu when link is clicked
+                });
+            } else {
+                console.error("Mobile menu elements not found.");
+            }
+
+
+             // --- Search Overlay ---
+            const searchOverlay = document.getElementById('search-overlay');
+            const searchButton = document.getElementById('search-button');
+            const searchButtonMobile = document.getElementById('search-button-mobile');
+            const closeSearchButton = document.getElementById('close-search');
+            const searchInput = document.getElementById('search-input');
+
+            // Function to open search overlay
+            const openSearch = () => {
+                searchOverlay.classList.add('visible');
+                searchInput.focus(); // Focus the input field when opened
+                document.body.style.overflow = 'hidden'; // Prevent background scroll
+            };
+
+            // Function to close search overlay
+            const closeSearch = () => {
+                searchOverlay.classList.remove('visible');
+                searchInput.value = ''; // Clear search input on close
+                 document.body.style.overflow = ''; // Restore scrolling
+            };
+
+            // Add event listeners for search overlay
+            if (searchOverlay && searchButton && searchButtonMobile && closeSearchButton && searchInput) {
+                searchButton.addEventListener('click', openSearch);
+                searchButtonMobile.addEventListener('click', openSearch);
+                closeSearchButton.addEventListener('click', closeSearch);
+
+                // Close search with Escape key
+                document.addEventListener('keydown', (event) => {
+                    if (event.key === 'Escape' && searchOverlay.classList.contains('visible')) {
+                        closeSearch();
+                    }
+                });
+                // Close search if clicking outside the input area (on the overlay background)
+                 searchOverlay.addEventListener('click', (event) => {
+                    // Check if the click target is the overlay itself, not its children
+                    if (event.target === searchOverlay) {
+                        closeSearch();
+                    }
+                });
+            } else {
+                 console.error("Search overlay elements not found.");
+            }
+
+
+            // --- Smooth Scrolling (handled by CSS html.scroll-smooth, JS fallback removed) ---
+
+
+            // --- Scroll Animations ---
+            const animatedElements = document.querySelectorAll('.scroll-animate');
+
+            // Check if Intersection Observer is supported
+            if ('IntersectionObserver' in window) {
+                const observer = new IntersectionObserver((entries, observerInstance) => { // Renamed observer variable
+                    entries.forEach(entry => {
+                        if (entry.isIntersecting) {
+                            // Add 'visible' class to trigger the animation defined in CSS
+                            entry.target.classList.add('visible');
+                            observerInstance.unobserve(entry.target); // Stop observing once animated
+                        }
+                    });
+                }, {
+                    threshold: 0.15 // Trigger when 15% of the element is visible
+                });
+
+                animatedElements.forEach(el => {
+                    observer.observe(el);
+                });
+            } else {
+                // Fallback for browsers that don't support IntersectionObserver
+                console.warn("IntersectionObserver not supported. Scroll animations may not work.");
+                // Optionally, make elements visible immediately
+                animatedElements.forEach(el => el.classList.add('visible'));
+            }
+
+
+            // --- Hero Headline Animation (Character Reveal on Load) ---
+            const heroHeadline = document.getElementById('hero-headline');
+            if (heroHeadline) {
+                // Make it visible first (opacity 0 set inline)
+                heroHeadline.style.opacity = '1';
+                const originalText = heroHeadline.textContent.trim(); // Store original text
+                heroHeadline.textContent = ''; // Clear content
+
+                let charIndex = 0;
+                const revealSpeed = 50; // Milliseconds per character
+
+                // Function for character reveal
+                const revealChar = () => {
+                    if (charIndex < originalText.length) {
+                        heroHeadline.textContent += originalText.charAt(charIndex);
+                        charIndex++;
+                        setTimeout(revealChar, revealSpeed); // Schedule next character
+                    } else {
+                        // Animation complete
+                        // Optional: Add glitch effect briefly after reveal
+                        // heroHeadline.classList.add('animate-glitch');
+                        // setTimeout(() => heroHeadline.classList.remove('animate-glitch'), 500);
+                    }
+                };
+
+                // Start animation after a short delay
+                setTimeout(revealChar, 300); // Start animation slightly after page load
+
+            } else {
+                 console.error("Hero headline element not found.");
+            }
+
+
+            // --- Newsletter Form Handling (Basic Example) ---
+            const newsletterForm = document.getElementById('newsletter-form');
+            const formMessage = document.getElementById('form-message'); // Re-use the same message div
+            const emailInput = document.getElementById('email'); // Get email input element
+
+            if (newsletterForm && formMessage && emailInput) {
+                newsletterForm.addEventListener('submit', (e) => {
+                    e.preventDefault(); // Prevent default form submission
+
+                    const email = emailInput.value.trim();
+
+                    // Basic email validation
+                    if (!email || !/^\S+@\S+\.\S+$/.test(email)) {
+                        formMessage.textContent = 'Please enter a valid email address.';
+                        formMessage.className = 'error mb-6 scroll-animate fade-in visible'; // Add classes directly
+                        formMessage.style.display = 'block'; // Ensure it's visible
+                        return; // Stop submission
+                    }
+
+                    // --- Simulate form submission ---
+                    console.log('Newsletter submitted (simulated):', { email });
+
+                    // Display success message
+                    formMessage.textContent = 'Thank you for subscribing!';
+                     formMessage.className = 'success mb-6 scroll-animate fade-in visible'; // Add classes directly
+                    formMessage.style.display = 'block'; // Ensure it's visible
+
+
+                    // Clear the form
+                    newsletterForm.reset();
+
+                    // Optional: Hide the message after a few seconds
+                    setTimeout(() => {
+                        formMessage.textContent = '';
+                        formMessage.className = 'mb-6 scroll-animate fade-in'; // Reset classes
+                        formMessage.style.display = 'none'; // Hide element
+                    }, 5000); // Hide after 5 seconds
+                });
+            } else {
+                console.error("Newsletter form elements not found.");
+            }
+
+
+            // --- Footer Current Year ---
+            const currentYearSpan = document.getElementById('current-year');
+             if (currentYearSpan) {
+                currentYearSpan.textContent = new Date().getFullYear();
+             } else {
+                 console.error("Current year span not found in footer.");
+             }
+
+            // --- Optional: Add particles.js ---
+            // (Keep the commented-out code as a placeholder if needed)
+            /*
+            if (typeof particlesJS !== 'undefined') {
+                // particles.js initialization code here...
+            } else {
+                console.warn("particles.js library not found. Particle effect disabled.");
+                const particlesDiv = document.getElementById('particles-js');
+                if (particlesDiv) particlesDiv.style.display = 'none'; // Hide placeholder if lib not found
+            }
+            */
+
+
+        }); // End DOMContentLoaded
+    </script>
+</body>
+</html>
